@@ -1,0 +1,461 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+/* ========== СТАРТОВАЯ СТРАНИЦА ========== */
+.start-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px;
+}
+
+.hero-section {
+    text-align: center;
+    background: rgba(255,255,255,0.95);
+    border-radius: 30px;
+    padding: 60px 40px;
+    margin-bottom: 50px;
+}
+
+.hero-section h1 {
+    font-size: 48px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.hero-section p {
+    font-size: 20px;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.start-btn {
+    padding: 15px 50px;
+    font-size: 20px;
+    background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.start-btn:hover {
+    transform: scale(1.05);
+}
+
+.features {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+}
+
+.feature {
+    background: rgba(255,255,255,0.9);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    flex: 1;
+}
+
+.feature-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+/* ========== РЕДАКТОР ========== */
+.editor-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.editor-sidebar {
+    width: 400px;
+    background: rgba(255,255,255,0.95);
+    padding: 20px;
+    overflow-y: auto;
+    border-right: 1px solid #ddd;
+}
+
+.live-preview {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.live-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    transition: all 0.3s;
+}
+
+.live-text {
+    margin-bottom: 30px;
+    font-size: 18px;
+    line-height: 1.6;
+    min-height: 100px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 15px;
+}
+
+.live-button {
+    margin: 20px 0;
+}
+
+.live-stickers {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+/* Вкладки */
+.editor-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.tab-btn.active {
+    background: #667eea;
+    color: white;
+    border-radius: 10px;
+}
+
+.tab-content {
+    display: none;
+    margin-bottom: 20px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Формы */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+.form-group input[type="color"] {
+    height: 50px;
+    cursor: pointer;
+}
+
+.form-group input[type="range"] {
+    width: calc(100% - 60px);
+    display: inline-block;
+}
+
+.text-options {
+    margin-top: 10px;
+}
+
+.text-options label {
+    display: inline-block;
+    margin-right: 15px;
+}
+
+/* Стикеры */
+.stickers-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.sticker {
+    background: #f0f0f0;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 20px;
+}
+
+.sticker:hover {
+    background: #e0e0e0;
+    transform: scale(1.05);
+}
+
+.selected-stickers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    min-height: 50px;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 10px;
+}
+
+.sticker-item {
+    background: #667eea;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 20px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.sticker-item .remove {
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.small-btn {
+    margin-top: 5px;
+    padding: 5px 15px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.save-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.save-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* ========== СТРАНИЦА ПРОСМОТРА ========== */
+.card-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    position: relative;
+}
+
+.card-wrapper {
+    background: rgba(255,255,255,0.95);
+    border-radius: 30px;
+    padding: 40px;
+    max-width: 650px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.card-header h1 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.hint-text {
+    color: #999;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.card-content {
+    position: relative;
+    min-height: 400px;
+}
+
+/* Скрытый текст */
+.card-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 30px;
+    margin: 20px 0;
+    font-size: 18px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: all 0.5s ease;
+}
+
+.hidden-text {
+    display: none;
+}
+
+/* Анимация появления текста */
+.show-text {
+    display: block;
+    animation: fadeInScale 0.5s ease;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Кнопка на странице просмотра */
+.card-btn {
+    margin: 20px 0;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    font-weight: bold;
+}
+
+.card-btn:hover {
+    transform: scale(1.05);
+}
+
+/* Контейнер для стикеров (можно двигать) */
+.stickers-canvas {
+    position: relative;
+    min-height: 250px;
+    margin-top: 20px;
+    background: rgba(240, 240, 255, 0.3);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+/* Отдельный стикер */
+.draggable-sticker {
+    position: absolute;
+    cursor: grab;
+    font-size: 45px;
+    transition: transform 0.1s;
+    user-select: none;
+    z-index: 10;
+}
+
+.draggable-sticker:active {
+    cursor: grabbing;
+}
+
+.draggable-sticker:hover {
+    transform: scale(1.1);
+    z-index: 100;
+}
+
+/* Карточка футера */
+.card-footer {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.footer-btn {
+    flex: 1;
+    padding: 12px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+
+.footer-btn:hover {
+    transform: translateY(-2px);
+    background: #5a67d8;
+}
+
+.share-footer {
+    background: #1DA1F2;
+}
+
+.share-footer:hover {
+    background: #1a8cd8;
+}
+
+/* Адаптивность */
+@media (max-width: 600px) {
+    .editor-container {
+        flex-direction: column;
+    }
+    
+    .editor-sidebar {
+        width: 100%;
+        max-height: 50vh;
+    }
+    
+    .card-wrapper {
+        padding: 20px;
+    }
+    
+    .card-text {
+        font-size: 14px;
+        padding: 20px;
+    }
+    
+    .draggable-sticker {
+        font-size: 35px;
+    }
+    
+    .card-footer {
+        flex-direction: column;
+    }
+    
+    .features {
+        flex-direction: column;
+    }
+    
+    .hero-section h1 {
+        font-size: 32px;
+    }
+}

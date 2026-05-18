@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактор открыток</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="editor-container">
+        <div class="editor-sidebar">
+            <h2>🎨 Редактор</h2>
+            
+            <!-- Вкладки редактора -->
+            <div class="editor-tabs">
+                <button class="tab-btn active" data-tab="text">📝 Текст</button>
+                <button class="tab-btn" data-tab="button">🔘 Кнопка</button>
+                <button class="tab-btn" data-tab="stickers">😊 Стикеры</button>
+                <button class="tab-btn" data-tab="preview">👀 Предпросмотр</button>
+            </div>
+            
+            <!-- Вкладка: Текст -->
+            <div id="textTab" class="tab-content active">
+                <h3>Напиши текст открытки</h3>
+                <textarea id="cardText" rows="8" placeholder="Введи текст для открытки...&#10;&#10;Например:&#10;С днём рождения!&#10;Желаю счастья, здоровья и успехов!"></textarea>
+                <div class="text-options">
+                    <label>
+                        <input type="checkbox" id="textCenter"> Центрировать текст
+                    </label>
+                    <label>
+                        <input type="checkbox" id="textBold"> Жирный текст
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Вкладка: Настройка кнопки -->
+            <div id="buttonTab" class="tab-content">
+                <h3>Настройки кнопки</h3>
+                
+                <div class="form-group">
+                    <label>Текст на кнопке:</label>
+                    <input type="text" id="buttonText" value="Открыть открытку" placeholder="Текст кнопки">
+                </div>
+                
+                <div class="form-group">
+                    <label>Цвет фона:</label>
+                    <input type="color" id="buttonBgColor" value="#FF6B6B">
+                </div>
+                
+                <div class="form-group">
+                    <label>Цвет текста:</label>
+                    <input type="color" id="buttonTextColor" value="#FFFFFF">
+                </div>
+                
+                <div class="form-group">
+                    <label>Стиль кнопки:</label>
+                    <select id="buttonStyle">
+                        <option value="rounded">Скруглённая</option>
+                        <option value="circle">Круглая</option>
+                        <option value="square">Квадратная</option>
+                        <option value="shadow">С тенью</option>
+                        <option value="glow">Свечение</option>
+                        <option value="border">С рамкой</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Размер кнопки:</label>
+                    <input type="range" id="buttonSize" min="30" max="80" value="50">
+                    <span id="sizeValue">50</span>px
+                </div>
+            </div>
+            
+            <!-- Вкладка: Стикеры -->
+            <div id="stickersTab" class="tab-content">
+                <h3>Добавь стикеры</h3>
+                <p class="hint">Нажми на стикер, чтобы добавить его</p>
+                <div class="stickers-grid">
+                    <div class="sticker" data-sticker="🎉">🎉 Праздник</div>
+                    <div class="sticker" data-sticker="🎂">🎂 Торт</div>
+                    <div class="sticker" data-sticker="🎁">🎁 Подарок</div>
+                    <div class="sticker" data-sticker="💖">💖 Любовь</div>
+                    <div class="sticker" data-sticker="⭐">⭐ Звезда</div>
+                    <div class="sticker" data-sticker="🔥">🔥 Огонь</div>
+                    <div class="sticker" data-sticker="✨">✨ Искры</div>
+                    <div class="sticker" data-sticker="🌸">🌸 Цветок</div>
+                    <div class="sticker" data-sticker="🐱">🐱 Кот</div>
+                    <div class="sticker" data-sticker="🐶">🐶 Собака</div>
+                    <div class="sticker" data-sticker="❤️">❤️ Сердце</div>
+                    <div class="sticker" data-sticker="💎">💎 Алмаз</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Свои стикеры (через пробел):</label>
+                    <input type="text" id="customStickers" placeholder="😊 🎈 🎊">
+                    <button id="addCustomSticker" class="small-btn">+ Добавить</button>
+                </div>
+                
+                <h4>Выбранные стикеры:</h4>
+                <div id="selectedStickers" class="selected-stickers"></div>
+            </div>
+            
+            <!-- Вкладка: Предпросмотр -->
+            <div id="previewTab" class="tab-content">
+                <h3>Предпросмотр</h3>
+                <div id="previewContent">
+                    <div class="preview-card">
+                        <div id="previewText" class="preview-text">Твой текст появится здесь...</div>
+                        <button id="previewBtn" class="preview-button">Предпросмотр</button>
+                        <div id="previewStickers" class="preview-stickers"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Кнопка сохранения -->
+            <button id="saveCardBtn" class="save-btn">💾 Создать открытку</button>
+        </div>
+        
+        <!-- Живой предпросмотр -->
+        <div class="live-preview">
+            <h3>👀 Живой предпросмотр</h3>
+            <div class="live-card" id="liveCard">
+                <div class="live-text" id="liveText">Твой текст будет здесь</div>
+                <button id="liveButton" class="live-button">Открытка</button>
+                <div class="live-stickers" id="liveStickers"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="editor.js"></script>
+</body>
+</html>

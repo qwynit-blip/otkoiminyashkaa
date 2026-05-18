@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конструктор открыток</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="start-container">
+        <div class="hero-section">
+            <h1>🎨 Создай уникальную открытку</h1>
+            <p>Выбери стиль, добавь стикеры, напиши текст — и поделись с друзьями!</p>
+            <button id="startCreateBtn" class="start-btn">✨ Создать открытку</button>
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🎨</div>
+                <h3>Свой дизайн</h3>
+                <p>Выбери цвет, стиль и оформление кнопки</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📝</div>
+                <h3>Любой текст</h3>
+                <p>Напиши то, что хочешь сказать</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔗</div>
+                <h3>Поделиться</h3>
+                <p>Отправь ссылку друзьям</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('startCreateBtn').addEventListener('click', () => {
+            window.location.href = 'editor.html';
+        });
+    </script>
+</body>
+</html>

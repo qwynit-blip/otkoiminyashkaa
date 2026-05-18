@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моя открытка</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="card-container" id="cardContainer">
+        <div class="card-wrapper">
+            <div class="card-header">
+                <h1>💌 Открытка для тебя</h1>
+                <p class="hint-text">✨ Нажми на кнопку, чтобы открыть послание ✨</p>
+            </div>
+            
+            <!-- Контент открытки -->
+            <div class="card-content" id="cardContent">
+                <!-- Текст изначально скрыт -->
+                <div id="cardText" class="card-text hidden-text"></div>
+                
+                <!-- Кнопка для показа текста -->
+                <button id="cardButton" class="card-btn"></button>
+                
+                <!-- Контейнер для перемещаемых стикеров -->
+                <div id="stickersCanvas" class="stickers-canvas"></div>
+            </div>
+            
+            <!-- Футер с кнопками -->
+            <div class="card-footer">
+                <button id="createOwnBtn" class="footer-btn">🔨 Создать свою открытку</button>
+                <button id="shareCardBtn" class="footer-btn share-footer">📤 Поделиться</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="card.js"></script>
+</body>
+</html>
