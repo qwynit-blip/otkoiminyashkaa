@@ -9,120 +9,133 @@
 <body>
     <div class="editor-container">
         <div class="editor-sidebar">
-            <h2>🎨 Редактор</h2>
+            <h2>🎨 Редактор открытки</h2>
             
-            <!-- Вкладки редактора -->
             <div class="editor-tabs">
                 <button class="tab-btn active" data-tab="text">📝 Текст</button>
                 <button class="tab-btn" data-tab="button">🔘 Кнопка</button>
-                <button class="tab-btn" data-tab="stickers">😊 Стикеры</button>
-                <button class="tab-btn" data-tab="preview">👀 Предпросмотр</button>
+                <button class="tab-btn" data-tab="stickers">😊 Эмодзи</button>
+                <button class="tab-btn" data-tab="photos">🖼️ Фото</button>
+                <button class="tab-btn" data-tab="background">🎨 Фон</button>
             </div>
             
             <!-- Вкладка: Текст -->
             <div id="textTab" class="tab-content active">
-                <h3>Напиши текст открытки</h3>
-                <textarea id="cardText" rows="8" placeholder="Введи текст для открытки...&#10;&#10;Например:&#10;С днём рождения!&#10;Желаю счастья, здоровья и успехов!"></textarea>
+                <h3>📝 Текст открытки</h3>
+                <textarea id="cardText" rows="6" placeholder="Введи текст для открытки..." style="width:100%"></textarea>
                 <div class="text-options">
-                    <label>
-                        <input type="checkbox" id="textCenter"> Центрировать текст
-                    </label>
-                    <label>
-                        <input type="checkbox" id="textBold"> Жирный текст
-                    </label>
+                    <label><input type="checkbox" id="textCenter"> Центрировать текст</label>
+                    <label><input type="checkbox" id="textBold"> Жирный текст</label>
+                </div>
+                <div class="form-group">
+                    <label>Цвет текста:</label>
+                    <input type="color" id="textColor" value="#333333">
                 </div>
             </div>
             
-            <!-- Вкладка: Настройка кнопки -->
+            <!-- Вкладка: Кнопка -->
             <div id="buttonTab" class="tab-content">
-                <h3>Настройки кнопки</h3>
-                
+                <h3>🔘 Настройки кнопки</h3>
                 <div class="form-group">
                     <label>Текст на кнопке:</label>
-                    <input type="text" id="buttonText" value="Открыть открытку" placeholder="Текст кнопки">
+                    <input type="text" id="buttonText" value="Открыть открытку">
                 </div>
-                
                 <div class="form-group">
-                    <label>Цвет фона:</label>
-                    <input type="color" id="buttonBgColor" value="#FF6B6B">
+                    <label>Цвет фона кнопки:</label>
+                    <input type="color" id="buttonBgColor" value="#ffa58a">
                 </div>
-                
                 <div class="form-group">
-                    <label>Цвет текста:</label>
-                    <input type="color" id="buttonTextColor" value="#FFFFFF">
+                    <label>Цвет текста кнопки:</label>
+                    <input type="color" id="buttonTextColor" value="#333333">
                 </div>
-                
                 <div class="form-group">
                     <label>Стиль кнопки:</label>
                     <select id="buttonStyle">
                         <option value="rounded">Скруглённая</option>
-                        <option value="circle">Круглая</option>
                         <option value="square">Квадратная</option>
                         <option value="shadow">С тенью</option>
                         <option value="glow">Свечение</option>
                         <option value="border">С рамкой</option>
                     </select>
                 </div>
-                
                 <div class="form-group">
-                    <label>Размер кнопки:</label>
+                    <label>Размер кнопки: <span id="sizeValue">50</span>px</label>
                     <input type="range" id="buttonSize" min="30" max="80" value="50">
-                    <span id="sizeValue">50</span>px
+                </div>
+                <div class="form-group">
+                    <label>Фото на кнопку:</label>
+                    <input type="file" id="buttonPhotoInput" accept="image/*">
+                    <div id="buttonPhotoPreview" style="margin-top:10px"></div>
                 </div>
             </div>
             
-            <!-- Вкладка: Стикеры -->
+            <!-- Вкладка: Эмодзи -->
             <div id="stickersTab" class="tab-content">
-                <h3>Добавь стикеры</h3>
-                <p class="hint">Нажми на стикер, чтобы добавить его</p>
-                <div class="stickers-grid">
-                    <div class="sticker" data-sticker="🎉">🎉 Праздник</div>
-                    <div class="sticker" data-sticker="🎂">🎂 Торт</div>
-                    <div class="sticker" data-sticker="🎁">🎁 Подарок</div>
-                    <div class="sticker" data-sticker="💖">💖 Любовь</div>
-                    <div class="sticker" data-sticker="⭐">⭐ Звезда</div>
-                    <div class="sticker" data-sticker="🔥">🔥 Огонь</div>
-                    <div class="sticker" data-sticker="✨">✨ Искры</div>
-                    <div class="sticker" data-sticker="🌸">🌸 Цветок</div>
-                    <div class="sticker" data-sticker="🐱">🐱 Кот</div>
-                    <div class="sticker" data-sticker="🐶">🐶 Собака</div>
-                    <div class="sticker" data-sticker="❤️">❤️ Сердце</div>
-                    <div class="sticker" data-sticker="💎">💎 Алмаз</div>
+                <h3>😊 Добавь эмодзи</h3>
+                <p class="hint">Нажми на эмодзи, чтобы добавить (макс 30 штук)</p>
+                <div class="stickers-grid" id="stickersGrid">
+                    <!-- Эмодзи будут добавлены через JS -->
                 </div>
-                
                 <div class="form-group">
-                    <label>Свои стикеры (через пробел):</label>
-                    <input type="text" id="customStickers" placeholder="😊 🎈 🎊">
-                    <button id="addCustomSticker" class="small-btn">+ Добавить</button>
+                    <label>Свои эмодзи (введите любой текст/эмодзи):</label>
+                    <input type="text" id="customSticker" placeholder="😊 ❤️ 🎉">
+                    <button id="addCustomSticker" class="small-btn">+ Добавить эмодзи</button>
                 </div>
-                
-                <h4>Выбранные стикеры:</h4>
+                <h4>Выбранные эмодзи (<span id="stickerCount">0</span>/30):</h4>
                 <div id="selectedStickers" class="selected-stickers"></div>
             </div>
             
-            <!-- Вкладка: Предпросмотр -->
-            <div id="previewTab" class="tab-content">
-                <h3>Предпросмотр</h3>
-                <div id="previewContent">
-                    <div class="preview-card">
-                        <div id="previewText" class="preview-text">Твой текст появится здесь...</div>
-                        <button id="previewBtn" class="preview-button">Предпросмотр</button>
-                        <div id="previewStickers" class="preview-stickers"></div>
-                    </div>
+            <!-- Вкладка: Фото -->
+            <div id="photosTab" class="tab-content">
+                <h3>🖼️ Добавь фото</h3>
+                <div class="form-group">
+                    <label>Загрузить своё фото:</label>
+                    <input type="file" id="photoUpload" accept="image/*">
+                </div>
+                <h4>Добавленные фото:</h4>
+                <div id="selectedPhotos" class="selected-photos"></div>
+                <div class="form-group">
+                    <label>Размер фото (px):</label>
+                    <input type="range" id="photoSize" min="40" max="150" value="60">
                 </div>
             </div>
             
-            <!-- Кнопка сохранения -->
+            <!-- Вкладка: Фон -->
+            <div id="backgroundTab" class="tab-content">
+                <h3>🎨 Настройки фона</h3>
+                <div class="form-group">
+                    <label>Основной цвет фона:</label>
+                    <input type="color" id="bgColor1" value="#faceb1">
+                </div>
+                <div class="form-group">
+                    <label>Второй цвет фона (градиент):</label>
+                    <input type="color" id="bgColor2" value="#ffa58a">
+                </div>
+                <div class="form-group">
+                    <label>PNG паттерн (много маленьких картинок):</label>
+                    <input type="file" id="patternUpload" accept="image/png">
+                    <button id="clearPattern" class="small-btn" style="margin-top:5px; background:#ff4444">❌ Очистить паттерн</button>
+                </div>
+                <div class="form-group">
+                    <label>Прозрачность паттерна:</label>
+                    <input type="range" id="patternOpacity" min="0" max="100" value="30">
+                </div>
+                <div class="form-group">
+                    <label>Размер паттерна (px):</label>
+                    <input type="range" id="patternSize" min="20" max="100" value="50">
+                </div>
+            </div>
+            
             <button id="saveCardBtn" class="save-btn">💾 Создать открытку</button>
         </div>
         
-        <!-- Живой предпросмотр -->
-        <div class="live-preview">
-            <h3>👀 Живой предпросмотр</h3>
+        <div class="live-preview" id="livePreview">
             <div class="live-card" id="liveCard">
+                <div class="background-pattern" id="livePattern"></div>
                 <div class="live-text" id="liveText">Твой текст будет здесь</div>
                 <button id="liveButton" class="live-button">Открытка</button>
                 <div class="live-stickers" id="liveStickers"></div>
+                <div class="live-photos" id="livePhotos"></div>
             </div>
         </div>
     </div>

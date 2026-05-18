@@ -6,7 +6,6 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
 }
 
@@ -40,8 +39,8 @@ body {
 .start-btn {
     padding: 15px 50px;
     font-size: 20px;
-    background: linear-gradient(45deg, #FF6B6B, #FF8E53);
-    color: white;
+    background: linear-gradient(45deg, #ffa58a, #faceb1);
+    color: #333;
     border: none;
     border-radius: 50px;
     cursor: pointer;
@@ -78,11 +77,14 @@ body {
 }
 
 .editor-sidebar {
-    width: 400px;
+    width: 450px;
     background: rgba(255,255,255,0.95);
     padding: 20px;
     overflow-y: auto;
     border-right: 1px solid #ddd;
+    max-height: 100vh;
+    position: sticky;
+    top: 0;
 }
 
 .live-preview {
@@ -91,6 +93,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    background: #faceb1;
 }
 
 .live-card {
@@ -98,10 +101,29 @@ body {
     border-radius: 20px;
     padding: 40px;
     width: 100%;
-    max-width: 500px;
+    max-width: 600px;
     text-align: center;
     box-shadow: 0 10px 40px rgba(0,0,0,0.2);
     transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Фоновый паттерн */
+.background-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.background-pattern img {
+    position: absolute;
+    opacity: 0.3;
+    pointer-events: none;
 }
 
 .live-text {
@@ -110,12 +132,24 @@ body {
     line-height: 1.6;
     min-height: 100px;
     padding: 20px;
-    background: #f9f9f9;
+    background: rgba(255,255,255,0.9);
     border-radius: 15px;
+    position: relative;
+    z-index: 1;
 }
 
 .live-button {
     margin: 20px 0;
+    position: relative;
+    z-index: 1;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    font-weight: bold;
+}
+
+.live-button:hover {
+    transform: scale(1.05);
 }
 
 .live-stickers {
@@ -124,31 +158,32 @@ body {
     justify-content: center;
     flex-wrap: wrap;
     margin-top: 20px;
+    position: relative;
+    z-index: 1;
 }
 
 /* Вкладки */
 .editor-tabs {
     display: flex;
-    gap: 10px;
+    gap: 5px;
     margin-bottom: 20px;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 10px;
+    flex-wrap: wrap;
 }
 
 .tab-btn {
     flex: 1;
-    padding: 10px;
-    background: none;
+    padding: 8px;
+    background: #f0f0f0;
     border: none;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 12px;
     transition: all 0.3s;
+    border-radius: 8px;
 }
 
 .tab-btn.active {
-    background: #667eea;
+    background: #ffa58a;
     color: white;
-    border-radius: 10px;
 }
 
 .tab-content {
@@ -172,7 +207,7 @@ body {
     color: #555;
 }
 
-.form-group input, .form-group select {
+.form-group input, .form-group select, .form-group textarea {
     width: 100%;
     padding: 10px;
     border: 2px solid #ddd;
@@ -202,9 +237,11 @@ body {
 /* Стикеры */
 .stickers-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     margin: 15px 0;
+    max-height: 200px;
+    overflow-y: auto;
 }
 
 .sticker {
@@ -214,11 +251,11 @@ body {
     text-align: center;
     cursor: pointer;
     transition: all 0.3s;
-    font-size: 20px;
+    font-size: 24px;
 }
 
 .sticker:hover {
-    background: #e0e0e0;
+    background: #ffa58a;
     transform: scale(1.05);
 }
 
@@ -227,14 +264,14 @@ body {
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 10px;
-    min-height: 50px;
+    min-height: 80px;
     padding: 10px;
     background: #f9f9f9;
     border-radius: 10px;
 }
 
 .sticker-item {
-    background: #667eea;
+    background: #ffa58a;
     color: white;
     padding: 5px 10px;
     border-radius: 20px;
@@ -250,6 +287,70 @@ body {
     cursor: pointer;
 }
 
+/* Фото */
+.photos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.photo-option {
+    background: #f0f0f0;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.photo-option img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.photo-option:hover {
+    background: #ffa58a;
+}
+
+.selected-photos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+    min-height: 80px;
+}
+
+.photo-item {
+    position: relative;
+    display: inline-block;
+}
+
+.photo-item img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.photo-item .remove-photo {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: red;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .small-btn {
     margin-top: 5px;
     padding: 5px 15px;
@@ -263,8 +364,8 @@ body {
 .save-btn {
     width: 100%;
     padding: 15px;
-    background: linear-gradient(45deg, #4CAF50, #45a049);
-    color: white;
+    background: linear-gradient(45deg, #ffa58a, #faceb1);
+    color: #333;
     border: none;
     border-radius: 10px;
     font-size: 18px;
@@ -291,10 +392,12 @@ body {
     background: rgba(255,255,255,0.95);
     border-radius: 30px;
     padding: 40px;
-    max-width: 650px;
+    max-width: 700px;
     width: 100%;
     text-align: center;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
 }
 
 .card-header h1 {
@@ -310,12 +413,11 @@ body {
 
 .card-content {
     position: relative;
-    min-height: 400px;
+    min-height: 450px;
 }
 
-/* Скрытый текст */
 .card-text {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: rgba(255,255,255,0.9);
     border-radius: 20px;
     padding: 30px;
     margin: 20px 0;
@@ -323,8 +425,8 @@ body {
     line-height: 1.8;
     white-space: pre-wrap;
     word-wrap: break-word;
-    color: white;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    color: #333;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     transition: all 0.5s ease;
 }
 
@@ -332,7 +434,6 @@ body {
     display: none;
 }
 
-/* Анимация появления текста */
 .show-text {
     display: block;
     animation: fadeInScale 0.5s ease;
@@ -349,7 +450,6 @@ body {
     }
 }
 
-/* Кнопка на странице просмотра */
 .card-btn {
     margin: 20px 0;
     cursor: pointer;
@@ -362,36 +462,44 @@ body {
     transform: scale(1.05);
 }
 
-/* Контейнер для стикеров (можно двигать) */
-.stickers-canvas {
+.stickers-canvas, .photos-canvas {
     position: relative;
-    min-height: 250px;
+    min-height: 200px;
     margin-top: 20px;
     background: rgba(240, 240, 255, 0.3);
     border-radius: 20px;
     overflow: hidden;
 }
 
-/* Отдельный стикер */
-.draggable-sticker {
+.draggable-sticker, .draggable-photo {
     position: absolute;
     cursor: grab;
-    font-size: 45px;
     transition: transform 0.1s;
     user-select: none;
     z-index: 10;
 }
 
-.draggable-sticker:active {
+.draggable-sticker:active, .draggable-photo:active {
     cursor: grabbing;
 }
 
-.draggable-sticker:hover {
-    transform: scale(1.1);
+.draggable-sticker:hover, .draggable-photo:hover {
+    transform: scale(1.05);
     z-index: 100;
 }
 
-/* Карточка футера */
+.draggable-sticker {
+    font-size: 40px;
+}
+
+.draggable-photo img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 10px;
+    pointer-events: none;
+}
+
 .card-footer {
     display: flex;
     gap: 15px;
@@ -401,8 +509,8 @@ body {
 .footer-btn {
     flex: 1;
     padding: 12px;
-    background: #667eea;
-    color: white;
+    background: #ffa58a;
+    color: #333;
     border: none;
     border-radius: 10px;
     cursor: pointer;
@@ -412,19 +520,31 @@ body {
 
 .footer-btn:hover {
     transform: translateY(-2px);
-    background: #5a67d8;
+    background: #e0896e;
 }
 
 .share-footer {
     background: #1DA1F2;
+    color: white;
 }
 
 .share-footer:hover {
     background: #1a8cd8;
 }
 
+/* Фоновый паттерн для просмотра */
+.view-background-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
 /* Адаптивность */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .editor-container {
         flex-direction: column;
     }
@@ -432,6 +552,7 @@ body {
     .editor-sidebar {
         width: 100%;
         max-height: 50vh;
+        position: relative;
     }
     
     .card-wrapper {
@@ -444,7 +565,12 @@ body {
     }
     
     .draggable-sticker {
-        font-size: 35px;
+        font-size: 30px;
+    }
+    
+    .draggable-photo img {
+        width: 45px;
+        height: 45px;
     }
     
     .card-footer {
