@@ -1,43 +1,51 @@
-// Эмуляция базы данных и глобального состояния через localStorage
+// Ядро базы данных (Single Page Application Architecture)
 let appState = {
-    currentUser: null,
-    usersDB: JSON.parse(localStorage.getItem('p_users')) || {
-        'qweezer': { password: '123', role: 'admin', friends: [], historyIn: [], historyOut: [] }
+    user: null,
+    db: JSON.parse(localStorage.getItem('pk_v2_users')) || {
+        'qweezer': { pass: '123', role: 'admin', friends: [], bio: 'Главный Администратор' }
     },
-    posts: JSON.parse(localStorage.getItem('p_posts')) || [],
-    news: JSON.parse(localStorage.getItem('p_news')) || [
-        { text: 'Добро пожаловать в обновленную версию PinkCards на GitHub Pages!', date: '19.05.2026' }
+    posts: JSON.parse(localStorage.getItem('pk_v2_posts')) || [],
+    news: JSON.parse(localStorage.getItem('pk_v2_news')) || [],
+    suggestions: JSON.parse(localStorage.getItem('pk_v2_sugg')) || [
+        { user: 'katya', text: 'Добавьте больше кошачьих каомодзи!' },
+        { user: 'danil', text: 'Сайт топ, сделайте тему темнее' }
     ],
-    siteSettings: JSON.parse(localStorage.getItem('p_settings')) || { logo: '🌸 PinkCards', bg: '' }
+    settings: JSON.parse(localStorage.getItem('pk_v2_set')) || {
+        logo: '🌸 PinkCards', mainColor: '#faceb1', accentColor: '#ffa58a', bgColor: '#fffcfb', bgImg: ''
+    }
 };
 
-// Текущее состояние редактора (параметры из editor.js + доработки ТЗ)
+// Временное состояние сборщика открытки
 let cardState = {
-    text: '', textColor: '#333333', textCenter: false, textBold: false,
-    buttonText: 'Открыть открытку', buttonBgColor: '#faceb1', buttonTextColor: '#ffffff',
-    buttonStyle: 'rounded', buttonSize: 50, buttonPhoto: null,
-    stickers: [], photos: [], photoSize: 100,
-    bgColor1: '#faceb1', bgColor2: '#ffa58a',
-    patternData: null, patternOpacity: 40, patternSize: 50, animation: 'gift'
+    text: 'Поздравляю от всей души! ✨', font: 'font-sans', align: true, bold: false, size: 22, color: '#2c2c2c',
+    btnText: 'Нажми меня 💌', btnBg: '#faceb1', btnColor: '#ffffff', btnStyle: 'rounded', btnSize: 16, btnPhoto: null,
+    bg1: '#faceb1', bg2: '#ffa58a', pattern: null, pSize: 45, pOp: 35,
+    items: [], // Объекты картинок и каомодзи { id, type, content, x, y }
+    anim: 'gift'
 };
 
-document.addEventListener('DOMContentLoaded', function() {
-    applyGlobalSettings();
-    initTabsAndBurger();
-    initStickersSelector();
-    initEditorBinding();
-    initAuthEngine();
-    renderFeed();
-    renderNews();
+const defaultKaomojis = ["(◕‿◕✿)", "(･θ･)", "(✿◠‿◠)", "ᕕ( ᐛ )ᕗ", "(╭ರ_⊙)", "(•‿•)", "(｡♥‿♥｡)", "(✖╭╮✖)", "¯\\_(ツ)_/¯", "(ง'̀-'́)ง"];
+
+document.addEventListener('DOMContentLoaded', () => {
+    applyDesignSettings();
+    initCoreUI();
+    initEditorEngine();
+    renderKaomojis();
+    checkParamsRoute();
     updateLivePreview();
 });
 
-// Глобальные настройки администрирования
-function applyGlobalSettings() {
-    const logos = document.querySelectorAll('#siteLogo');
-    logos.forEach(el => el.textContent = appState.siteSettings.logo);
-    if(appState.siteSettings.bg) {
-        document.body.style.backgroundImage = `url(${appState.siteSettings.bg})`;
+// Динамическое применение стилей админа
+function applyDesignSettings() {
+    const s = appState.settings;
+    const r = document.documentElement.style;
+    r.setProperty('--pink', s.mainColor);
+    r.setProperty('--orange', s.accentColor);
+    r.setProperty('--bg', s.bgColor);
+    
+    document.getElementById('siteLogoBtn').textContent = s.logo;
+    if(s.bgImg) {
+        document.body.style.backgroundImage = `url(${s.bgImg})`;
         document.body.style.backgroundSize = 'cover';
         document.body.style.backgroundAttachment = 'fixed';
     } else {
@@ -45,557 +53,554 @@ function applyGlobalSettings() {
     }
 }
 
-// Управление вкладками и боковым мобильным меню
-function initTabsAndBurger() {
-    const tabs = document.querySelectorAll('.tab-btn');
-    const sideLinks = document.querySelectorAll('.side-menu .menu-items a');
+// Регулятор вкладок верхнего уровня
+function changeTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-inline-btn').forEach(b => b.classList.remove('active'));
     
-    function changeTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        tabs.forEach(t => t.classList.remove('active'));
-        
-        const currentTab = document.getElementById(`${tabId}Tab`);
-        const currentBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
-        
-        if (currentTab) currentTab.classList.add('active');
-        if (currentBtn) currentBtn.classList.add('active');
-        document.getElementById('sideMenu').classList.remove('active');
+    document.getElementById(tabId + 'Tab')?.classList.add('active');
+    document.getElementById('sideMenu').classList.remove('active');
+    
+    // Подсветка кнопок шапки
+    if(['feed','create','news'].includes(tabId)) {
+        const btns = document.querySelectorAll('.nav-inline-btn');
+        if(tabId==='feed') btns[0].classList.add('active');
+        if(tabId==='create') btns[1].classList.add('active');
+        if(tabId==='news') btns[2].classList.add('active');
     }
 
-    tabs.forEach(btn => btn.addEventListener('click', () => changeTab(btn.dataset.tab)));
-    sideLinks.forEach(link => link.addEventListener('click', (e) => {
-        e.preventDefault();
-        changeTab(link.dataset.target);
-    }));
-
-    document.getElementById('siteLogo').addEventListener('click', () => changeTab('create'));
-    document.getElementById('burgerBtn').addEventListener('click', () => document.getElementById('sideMenu').classList.add('active'));
-    document.getElementById('closeMenuBtn').addEventListener('click', () => document.getElementById('sideMenu').classList.remove('active'));
+    if(tabId === 'feed') renderFeed();
+    if(tabId === 'profile') loadMyProfile();
+    if(tabId === 'history') renderHistory();
+    if(tabId === 'friends') renderFriendsList();
+    if(tabId === 'news') renderNewsFeed();
 }
 
-// Генерация сетки базовых эмодзи
-function initStickersSelector() {
-    const defaultEmojis = ['😊','❤️','🎉','🎂','⭐','✨','🌸','🐱','💖','🌈','🎈','🥳','💩','💐','💨','📦','🍬','🧸','🍕','🐱','🐶'];
-    const grid = document.getElementById('stickersGrid');
-    if(!grid) return;
-    grid.innerHTML = '';
-    defaultEmojis.forEach(emoji => {
-        const item = document.createElement('span');
-        item.className = 'sticker';
-        item.textContent = emoji;
-        item.addEventListener('click', () => pushSticker(emoji));
-        grid.appendChild(item);
+function initCoreUI() {
+    document.getElementById('burgerBtn').onclick = () => document.getElementById('sideMenu').classList.add('active');
+    document.getElementById('closeMenuBtn').onclick = () => document.getElementById('sideMenu').classList.remove('active');
+    
+    // Клик на Логотип (Правка 1, 2, 3)
+    document.getElementById('siteLogoBtn').onclick = () => {
+        const modal = document.getElementById('logoMenuModal');
+        const suggRow = document.getElementById('adminSuggestionsRow');
+        
+        if(appState.user?.role === 'admin') {
+            suggRow.style.display = 'block';
+            document.getElementById('suggestionsContainer').innerHTML = appState.suggestions.map(s => `<div><b>@${s.user}:</b> ${s.text}</div>`).join('');
+        } else {
+            suggRow.style.display = 'none';
+        }
+        modal.style.display = 'flex';
+    };
+
+    // Табы внутри конструктора открыток
+    document.querySelectorAll('.ed-tab-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.ed-tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.ed-tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(btn.dataset.edtab).classList.add('active');
+        }
     });
+
+    // Авторизация
+    const authHandler = (isRegistering) => {
+        const u = document.getElementById('usernameInput').value.trim();
+        const p = document.getElementById('passwordInput').value.trim();
+        if(!u || !p) return alert('Заполните поля!');
+        
+        if(isRegistering) {
+            if(appState.db[u]) return alert('Этот никнейм уже занят!');
+            appState.db[u] = { pass: p, role: 'user', friends: [], bio: '' };
+            saveDB();
+            alert('Регистрация успешна! Теперь войдите.');
+        } else {
+            if(!appState.db[u] || appState.db[u].pass !== p) return alert('Неверный логин или пароль!');
+            appState.user = { name: u, ...appState.db[u] };
+            syncAuthInterface();
+            alert(`Добро пожаловать, ${u}!`);
+        }
+    };
+    document.getElementById('loginBtn').onclick = () => authHandler(false);
+    document.getElementById('registerBtn').onclick = () => authHandler(true);
+    document.getElementById('logoutBtn').onclick = () => { appState.user = null; syncAuthInterface(); changeTab('feed'); };
+    
+    document.getElementById('userSearchInput').oninput = (e) => renderFeed(e.target.value);
 }
 
-function pushSticker(emoji) {
-    if (cardState.stickers.length >= 30) { alert('Лимит 30 эмодзи превышен!'); return; }
-    cardState.stickers.push(emoji);
-    syncListsUI();
+function syncAuthInterface() {
+    const logged = !!appState.user;
+    document.getElementById('authSidebarBlock').style.display = logged ? 'none' : 'block';
+    document.getElementById('userProfileSidebarBlock').style.display = logged ? 'block' : 'none';
+    document.getElementById('authMenuLinks').style.display = logged ? 'block' : 'none';
+    
+    if(logged) {
+        const name = appState.user.name;
+        document.getElementById('sidebarUserName').textContent = name;
+        document.getElementById('sidebarUserRole').textContent = appState.user.role;
+        
+        const avatar = document.getElementById('sidebarLetterAvatar');
+        avatar.textContent = name.charAt(0);
+        
+        if(appState.user.role === 'admin') {
+            document.getElementById('adminLink').style.display = 'block';
+            document.getElementById('adminNewsBlock').style.display = 'block';
+            renderAdminTable();
+        }
+    } else {
+        document.getElementById('adminLink').style.display = 'none';
+        document.getElementById('adminNewsBlock').style.display = 'none';
+    }
+    renderFeed();
+}
+
+function renderKaomojis() {
+    const container = document.getElementById('kaomojiContainer');
+    container.innerHTML = defaultKaomojis.map(k => `<button class="km-btn" onclick="addMovableItem('kaomoji', '${k}')">${k}</button>`).join('');
+}
+
+// --- ДВИЖОК РЕДАКТОРА С DRAG AND DROP (Правка 5) ---
+function initEditorEngine() {
+    const bindEl = (id, key, ev='input', check=false) => {
+        document.getElementById(id).addEventListener(ev, e => { cardState[key] = check ? e.target.checked : e.target.value; updateLivePreview(); });
+    };
+    bindEl('cardText', 'text'); bindEl('cardFont', 'font', 'change'); bindEl('textCenter', 'align', 'change', check=true);
+    bindEl('textBold', 'bold', 'change', check=true); bindEl('textSize', 'size'); bindEl('textColor', 'color');
+    bindEl('buttonText', 'btnText'); bindEl('buttonStyle', 'buttonStyle', 'change'); bindEl('buttonSize', 'btnSize');
+    bindEl('buttonBgColor', 'btnBg'); bindEl('buttonTextColor', 'btnColor'); bindEl('bgColor1', 'bg1');
+    bindEl('bgColor2', 'bg2'); bindEl('patternSize', 'pSize'); bindEl('patternOpacity', 'pOp');
+    bindEl('animationType', 'anim', 'change');
+
+    // Кастомный эмодзи кнопкой
+    document.getElementById('addCustomEmojiBtn').onclick = () => {
+        const val = document.getElementById('customEmoji').value.trim();
+        if(val) { addMovableItem('kaomoji', val); document.getElementById('customEmoji').value = ''; }
+    };
+
+    // Чтение локальных файлов картинок
+    const setupFileReader = (inputId, callback) => {
+        document.getElementById(inputId).onchange = e => {
+            if(e.target.files[0]) {
+                const r = new FileReader();
+                r.onload = ev => callback(ev.target.result);
+                r.readAsDataURL(e.target.files[0]);
+            }
+        };
+    };
+    setupFileReader('btnPhotoInput', data => { cardState.btnPhoto = data; updateLivePreview(); });
+    setupFileReader('patternInput', data => { cardState.pattern = data; updateLivePreview(); });
+    setupFileReader('photoInput', data => addMovableItem('photo', data));
+
+    document.getElementById('photoSizeRange').oninput = (e) => {
+        const size = e.target.value;
+        document.querySelectorAll('#liveMovableZone .draggable-img').forEach(img => {
+            img.style.width = size + 'px';
+            const id = img.parentElement.dataset.id;
+            const item = cardState.items.find(x => x.id == id);
+            if(item) item.size = size;
+        });
+    };
+
+    // Кнопка публикации
+    document.getElementById('publishBtn').onclick = () => {
+        const rec = document.getElementById('receiverInput').value.trim();
+        const post = {
+            id: Date.now(),
+            author: appState.user ? appState.user.name : 'Аноним',
+            receiver: rec || null,
+            date: new Date().toLocaleDateString(),
+            likes: [], comments: [],
+            isPrivate: document.getElementById('isPrivate').checked,
+            data: JSON.parse(JSON.stringify(cardState))
+        };
+        appState.posts.unshift(post);
+        localStorage.setItem('pk_v2_posts', JSON.stringify(appState.posts));
+        
+        // Автоматическая симуляция предложения на акк админа, если указан админ получателем
+        if(rec === 'qweezer') {
+            appState.suggestions.push({ user: post.author, text: `Вам направлена открытка №${post.id}` });
+            localStorage.setItem('pk_v2_sugg', JSON.stringify(appState.suggestions));
+        }
+
+        changeTab('feed');
+        alert('Поздравляем! Открытка успешно загружена на платформу.');
+    };
+}
+
+// Добавление интерактивного перетаскиваемого объекта на сцену
+function addMovableItem(type, content) {
+    const id = Date.now() + Math.random();
+    const size = type === 'photo' ? document.getElementById('photoSizeRange').value : 32;
+    cardState.items.push({ id, type, content, x: 25, y: 35, size: size });
     updateLivePreview();
 }
 
-function syncListsUI() {
-    document.getElementById('selectedStickers').innerHTML = cardState.stickers.map((s, i) => `
-        <div class="sticker-item">${s} <span onclick="removeStickerItem(${i})">✖</span></div>
-    `).join('');
-    
-    document.getElementById('selectedPhotos').innerHTML = cardState.photos.map((p, i) => `
-        <div class="photo-item">📷 Фото ${i+1} <span onclick="removePhotoItem(${i})">✖</span></div>
-    `).join('');
-}
-
-window.removeStickerItem = function(index) { cardState.stickers.splice(index, 1); syncListsUI(); updateLivePreview(); };
-window.removePhotoItem = function(index) { cardState.photos.splice(index, 1); syncListsUI(); updateLivePreview(); };
-
-// Связывание интерфейса редактора с объектом состояния открытки
-function initEditorBinding() {
-    document.getElementById('cardText').addEventListener('input', (e) => { cardState.text = e.target.value; updateLivePreview(); });
-    document.getElementById('textCenter').addEventListener('change', (e) => { cardState.textCenter = e.target.checked; updateLivePreview(); });
-    document.getElementById('textBold').addEventListener('change', (e) => { cardState.textBold = e.target.checked; updateLivePreview(); });
-    document.getElementById('textColor').addEventListener('input', (e) => { cardState.textColor = e.target.value; updateLivePreview(); });
-    
-    document.getElementById('buttonText').addEventListener('input', (e) => { cardState.buttonText = e.target.value; updateLivePreview(); });
-    document.getElementById('buttonBgColor').addEventListener('input', (e) => { cardState.buttonBgColor = e.target.value; updateLivePreview(); });
-    document.getElementById('buttonTextColor').addEventListener('input', (e) => { cardState.buttonTextColor = e.target.value; updateLivePreview(); });
-    document.getElementById('buttonStyle').addEventListener('change', (e) => { cardState.buttonStyle = e.target.value; updateLivePreview(); });
-    
-    document.getElementById('buttonSize').addEventListener('input', (e) => {
-        cardState.buttonSize = e.target.value;
-        document.getElementById('sizeValue').textContent = e.target.value;
-        updateLivePreview();
-    });
-    document.getElementById('photoSize').addEventListener('input', (e) => {
-        cardState.photoSize = e.target.value;
-        document.getElementById('photoSizeValue').textContent = e.target.value;
-        updateLivePreview();
-    });
-    document.getElementById('patternSize').addEventListener('input', (e) => {
-        cardState.patternSize = parseInt(e.target.value);
-        document.getElementById('patternSizeValue').textContent = e.target.value;
-        updateLivePreview();
-    });
-    document.getElementById('patternOpacity').addEventListener('input', (e) => {
-        cardState.patternOpacity = parseInt(e.target.value);
-        document.getElementById('patternOpacityValue').textContent = e.target.value;
-        updateLivePreview();
-    });
-
-    document.getElementById('bgColor1').addEventListener('input', (e) => { cardState.bgColor1 = e.target.value; updateLivePreview(); });
-    document.getElementById('bgColor2').addEventListener('input', (e) => { cardState.bgColor2 = e.target.value; updateLivePreview(); });
-
-    document.getElementById('addCustomSticker').addEventListener('click', () => {
-        const inp = document.getElementById('customSticker');
-        if(inp.value.trim()) { pushSticker(inp.value.trim()); inp.value = ''; }
-    });
-
-    // Обработка FileReader для картинок
-    document.getElementById('photoUpload').addEventListener('change', (e) => {
-        if(e.target.files && e.target.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (ev) => { cardState.photos.push(ev.target.result); syncListsUI(); updateLivePreview(); };
-            reader.readAsDataURL(e.target.files[0]);
-        }
-    });
-
-    document.getElementById('buttonPhotoInput').addEventListener('change', (e) => {
-        if(e.target.files && e.target.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (ev) => { cardState.buttonPhoto = ev.target.result; updateLivePreview(); };
-            reader.readAsDataURL(e.target.files[0]);
-        }
-    });
-
-    document.getElementById('patternUpload').addEventListener('change', (e) => {
-        if(e.target.files && e.target.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (ev) => { cardState.patternData = ev.target.result; updateLivePreview(); };
-            reader.readAsDataURL(e.target.files[0]);
-        }
-    });
-
-    document.getElementById('clearPattern').addEventListener('click', () => { cardState.patternData = null; updateLivePreview(); });
-
-    // Кнопки переключения анимаций
-    const animBtns = document.querySelectorAll('.anim-select-btn');
-    animBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            animBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            cardState.animation = btn.dataset.animation;
-        });
-    });
-
-    document.getElementById('saveCardBtn').addEventListener('click', commitPublishCard);
-
-    // Триггер запуска демонстрации анимации в окне Предпросмотра
-    document.getElementById('liveButton').addEventListener('click', () => {
-        executeCardCoreAnimation('animationStage', cardState, 'liveText', 'liveStickers', 'livePhotos');
-    });
-}
-
-// Отрисовка паттерна сеткой (Интеграция логики вашего оригинального editor.js)
-function drawPatternGrid(container, state) {
-    if(!container) return;
-    container.innerHTML = '';
-    if(!state.patternData) return;
-
-    // Рассчитываем количество необходимых плиток на основе размеров контейнера превью
-    const cols = Math.ceil(500 / state.patternSize);
-    const rows = Math.ceil(400 / state.patternSize);
-
-    for (let i = 0; i < cols * rows; i++) {
-        const img = document.createElement('img');
-        img.src = state.patternData;
-        img.style.width = `${state.patternSize}px`;
-        img.style.height = `${state.patternSize}px`;
-        img.style.position = 'absolute';
-        img.style.left = `${(i % cols) * state.patternSize}px`;
-        img.style.top = `${Math.floor(i / cols) * state.patternSize}px`;
-        img.style.opacity = state.patternOpacity / 100;
-        container.appendChild(img);
-    }
-}
-
-// Обновление интерфейса Живого предпросмотра
 function updateLivePreview() {
-    const box = document.getElementById('livePreview');
-    if(!box) return;
-
-    box.style.background = `linear-gradient(135deg, ${cardState.bgColor1}, ${cardState.bgColor2})`;
-    drawPatternGrid(document.getElementById('livePattern'), cardState);
-
-    // Стилизация кнопки
-    const btn = document.getElementById('liveButton');
-    btn.textContent = cardState.buttonText;
-    btn.style.color = cardState.buttonTextColor;
-    btn.style.padding = `${cardState.buttonSize * 0.2}px ${cardState.buttonSize * 0.5}px`;
-    btn.style.background = cardState.buttonPhoto ? `url(${cardState.buttonPhoto}) center/cover` : cardState.buttonBgColor;
-
-    btn.style.borderRadius = cardState.buttonStyle === 'rounded' ? '50px' : cardState.buttonStyle === 'square' ? '4px' : '8px';
-    btn.style.boxShadow = cardState.buttonStyle === 'glow' ? `0 0 15px ${cardState.buttonBgColor}` : 'none';
-
-    // Подготовка контента к скрытию перед воспроизведением анимации
-    const t = document.getElementById('liveText');
-    t.classList.remove('visible');
-    t.textContent = cardState.text || 'Текст открытки';
-    t.style.color = cardState.textColor;
-    t.style.textAlign = cardState.textCenter ? 'center' : 'left';
-    t.style.fontWeight = cardState.textBold ? 'bold' : 'normal';
-
-    const s = document.getElementById('liveStickers');
-    s.classList.remove('visible');
-    s.innerHTML = cardState.stickers.map(st => `<span>${st}</span>`).join(' ');
-
-    const p = document.getElementById('livePhotos');
-    p.classList.remove('visible');
-    p.innerHTML = cardState.photos.map(ph => `<img src="${ph}" style="width:${cardState.photoSize}px; border-radius:6px; margin:4px;">`).join('');
-}
-
-// СИСТЕМА ДВИЖКА АНИМАЦИЙ (Все 5 эффектов из ТЗ)
-function executeCardCoreAnimation(stageId, state, txtId, stkId, phtId) {
-    const stage = document.getElementById(stageId);
-    if(!stage) return;
-    stage.innerHTML = '';
-
-    const t = document.getElementById(txtId);
-    const s = document.getElementById(stkId);
-    const p = document.getElementById(phtId);
-
-    // Запуск анимации появления контента
-    setTimeout(() => {
-        if(t) t.classList.add('visible');
-        if(s) s.classList.add('visible');
-        if(p) p.classList.add('visible');
-    }, 400);
-
-    // Физика частиц в зависимости от выбора
-    if(state.animation === 'gift' || state.animation === 'bouquet') {
-        let pEmoji = state.animation === 'gift' ? '🎉' : '🌸';
-        
-        if(state.animation === 'gift') {
-            const box = document.createElement('div');
-            box.className = 'falling-element';
-            box.textContent = '🎁';
-            stage.appendChild(box);
-        }
-
-        for(let i=0; i<30; i++) {
-            const part = document.createElement('div');
-            part.className = 'particle';
-            part.textContent = pEmoji;
-            part.style.left = '50%'; part.style.top = '40%';
-            part.style.setProperty('--dx', `${(Math.random() - 0.5) * 260}px`);
-            part.style.setProperty('--dy', `${(Math.random() - 0.5) * 260}px`);
-            stage.appendChild(part);
-        }
-    }
-    else if(state.animation === 'poop') {
-        const poop = document.createElement('div');
-        poop.className = 'falling-element';
-        poop.textContent = '💩';
-        stage.appendChild(poop);
-
-        setTimeout(() => {
-            for(let i=0; i<15; i++) {
-                const splash = document.createElement('div');
-                splash.className = 'particle';
-                splash.textContent = '💦';
-                splash.style.left = '50%'; splash.style.top = '40%';
-                splash.style.setProperty('--dx', `${(Math.random() - 0.5) * 160}px`);
-                splash.style.setProperty('--dy', `${(Math.random() - 0.2) * -120}px`);
-                stage.appendChild(splash);
-            }
-        }, 500);
-    }
-    else if(state.animation === 'fart') {
-        for(let i=0; i<12; i++) {
-            const cloud = document.createElement('div');
-            cloud.className = 'fart-cloud';
-            cloud.textContent = '💨';
-            cloud.style.left = '45%'; cloud.style.top = '35%';
-            cloud.style.setProperty('--gx', `${(Math.random() - 0.5) * 180}px`);
-            cloud.style.setProperty('--gy', `${(Math.random() - 0.5) * 180}px`);
-            stage.appendChild(cloud);
-        }
-    }
-    else if(state.animation === 'fall') {
-        const box = document.createElement('div');
-        box.className = 'falling-element';
-        box.textContent = '📦';
-        stage.appendChild(box);
-    }
-}
-
-// Функция публикации новой открытки
-function commitPublishCard() {
-    if(!cardState.text.trim()) { alert('Пожалуйста, напишите поздравление!'); return; }
+    const st = cardState;
+    const stage = document.getElementById('livePreview');
+    stage.style.background = `linear-gradient(135deg, ${st.bg1}, ${st.bg2})`;
     
-    const post = {
-        id: Date.now(),
-        author: appState.currentUser ? appState.currentUser.name : 'Аноним',
-        date: new Date().toLocaleDateString(),
-        isPrivate: document.getElementById('isPrivate').checked,
-        likes: [],
-        comments: [],
-        cardData: JSON.parse(JSON.stringify(cardState))
+    drawPatternEngine('livePattern', st);
+    
+    // Конфигурация Кнопки
+    const btn = document.getElementById('liveBtn');
+    btn.textContent = st.btnText; btn.style.color = st.btnColor;
+    btn.style.fontSize = st.btnSize + 'px';
+    btn.style.background = st.btnPhoto ? `url(${st.btnPhoto}) center/cover` : st.btnBg;
+    btn.style.padding = '12px 28px';
+    btn.className = 'card-action-btn primary-btn ' + (st.buttonStyle === 'glass' ? 'btn-glass' : '');
+    btn.style.borderRadius = st.buttonStyle === 'rounded' ? '50px' : '10px';
+    btn.style.boxShadow = st.buttonStyle === 'glow' ? `0 0 20px ${st.btnBg}` : 'none';
+    btn.style.display = 'inline-block';
+
+    // Конфигурация Скрытого текста
+    const txt = document.getElementById('liveText');
+    txt.textContent = st.text; txt.style.color = st.color;
+    txt.style.fontSize = st.size + 'px';
+    txt.className = `card-text ${st.font}`;
+    txt.style.textAlign = st.align ? 'center' : 'left';
+    txt.style.fontWeight = st.bold ? 'bold' : 'normal';
+
+    // Рендер перетаскиваемых объектов
+    const zone = document.getElementById('liveMovableZone');
+    zone.innerHTML = '';
+    
+    st.items.forEach(item => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'draggable-item';
+        wrapper.dataset.id = item.id;
+        wrapper.style.left = item.x + '%';
+        wrapper.style.top = item.y + '%';
+        
+        if(item.type === 'photo') {
+            wrapper.innerHTML = `<img src="${item.content}" class="draggable-img" style="width:${item.size}px;">`;
+        } else {
+            wrapper.innerHTML = `<span class="draggable-emoji">${item.content}</span>`;
+        }
+        
+        // Внедрение Drag and Drop физики
+        makeElementDraggable(wrapper, item);
+        zone.appendChild(wrapper);
+    });
+    
+    // При вводе сбрасываем состояние
+    document.getElementById('liveContent').classList.remove('visible');
+    document.getElementById('liveAmbient').classList.remove('active');
+}
+
+function makeElementDraggable(el, itemRef) {
+    let posX = 0, posY = 0, startX = 0, startY = 0;
+    
+    const dragStart = (e) => {
+        e = e || window.event;
+        if(e.type === 'touchstart') {
+            startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+        } else {
+            startX = e.clientX; startY = e.clientY;
+        }
+        document.onmouseup = dragEnd;
+        document.onmousemove = dragElement;
+        document.ontouchend = dragEnd;
+        document.ontouchmove = dragElement;
     };
 
-    appState.posts.unshift(post);
-    localStorage.setItem('p_posts', JSON.stringify(appState.posts));
+    const dragElement = (e) => {
+        e = e || window.event;
+        let clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+        let clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+        
+        posX = startX - clientX; posY = startY - clientY;
+        startX = clientX; startY = clientY;
+        
+        let pHeight = el.parentElement.clientHeight;
+        let pWidth = el.parentElement.clientWidth;
+        
+        let newTopPercent = ((el.offsetTop - posY) / pHeight) * 100;
+        let newLeftPercent = ((el.offsetLeft - posX) / pWidth) * 100;
+        
+        if(newTopPercent >= 0 && newTopPercent <= 90) el.style.top = newTopPercent + "%";
+        if(newLeftPercent >= 0 && newLeftPercent <= 90) el.style.left = newLeftPercent + "%";
+    };
 
-    if(appState.currentUser) {
-        appState.usersDB[appState.currentUser.name].historyOut.push(post.id);
-        localStorage.setItem('p_users', JSON.stringify(appState.usersDB));
-        syncProfileUI();
+    const dragEnd = () => {
+        document.onmouseup = null; document.onmousemove = null;
+        document.ontouchend = null; document.ontouchmove = null;
+        // Сохраняем финальные координаты в стейт
+        itemRef.x = parseFloat(el.style.left);
+        itemRef.y = parseFloat(el.style.top);
+    };
+
+    el.onmousedown = dragStart;
+    el.ontouchstart = dragStart;
+}
+
+function drawPatternEngine(targetId, state) {
+    const c = document.getElementById(targetId); if(!c) return;
+    c.innerHTML = ''; if(!state.pattern) return;
+    const count = 35;
+    for(let i=0; i<count; i++) {
+        const img = document.createElement('img'); img.src = state.pattern;
+        img.style.cssText = `position:absolute; width:${state.pSize}px; height:${state.pSize}px; opacity:${state.pOp/100}; left:${(i%7)*(100/6)}%; top:${Math.floor(i/7)*70}px; transform:rotate(${(i*13)%45}deg);`;
+        c.appendChild(img);
+    }
+}
+
+// --- СВЕРХТОЧНЫЙ ВОСПРОИЗВОДЯЩИЙ ДВИЖОК АНИМАЦИЙ (Правка 6) ---
+document.getElementById('liveBtn').onclick = () => runAnimationEngine('live', cardState);
+
+function runAnimationEngine(pfx, state) {
+    document.getElementById(`${pfx}Btn`).style.display = 'none';
+    const contentBox = document.getElementById(`${pfx}Content`);
+    contentBox.classList.add('visible');
+    
+    // Эффект окружения
+    const amb = document.getElementById(`${pfx}Ambient`);
+    amb.innerHTML = ''; amb.classList.add('active');
+    
+    state.items.filter(x => x.type === 'kaomoji').forEach(k => {
+        const sp = document.createElement('span'); sp.className = 'ambient-emoji'; sp.textContent = k.content;
+        sp.style.left = k.x + '%'; sp.style.top = k.y + '%';
+        amb.appendChild(sp);
+    });
+
+    // Отрендерить медиафайлы статично во время воспроизведения
+    if(pfx === 'modal') {
+        const zone = document.getElementById('modalMovableZone'); zone.innerHTML = '';
+        state.items.forEach(item => {
+            const el = document.createElement('div'); el.className = 'draggable-item';
+            el.style.left = item.x+'%'; el.style.top = item.y+'%';
+            el.innerHTML = item.type==='photo' ? `<img src="${item.content}" style="width:${item.size}px; border-radius:8px;">` : `<span style="font-size:24px;">${item.content}</span>`;
+            zone.appendChild(el);
+        });
     }
 
-    alert('✨ Открытка успешно размещена в системе!');
-    renderFeed();
-}
+    // Режимы частиц
+    const anim = document.getElementById(`${pfx}Anim`); anim.innerHTML = '';
+    const fxMap = { gift: '🎉', poop: '💩', bouquet: '🌸', fart: '💨' };
+    const curFx = fxMap[state.anim] || '✨';
 
-// Отрисовка Instagram Ленты
-function renderFeed() {
-    const feed = document.getElementById('instagramFeed');
-    const adminGrid = document.getElementById('adminAllCardsGrid');
-    if(!feed) return;
+    if(['gift','poop','fall'].includes(state.anim)) {
+        const obj = document.createElement('div'); obj.className = 'falling-obj';
+        obj.textContent = state.anim === 'gift' ? '🎁' : state.anim === 'poop' ? '💩' : '📦';
+        obj.classList.add(state.anim === 'gift' ? 'fall-gift-anim' : state.anim === 'poop' ? 'fall-poop-anim' : 'fall-shake-anim');
+        anim.appendChild(obj);
+    }
 
-    let feedHTML = '';
-    let adminHTML = '';
-
-    appState.posts.forEach(post => {
-        const isMe = appState.currentUser && appState.currentUser.name === post.author;
-        const isAdmin = appState.currentUser && appState.currentUser.role === 'admin';
-        const isMyFriend = appState.currentUser && appState.usersDB[appState.currentUser.name].friends.includes(post.author);
-
-        const postUI = `
-            <div class="insta-post">
-                <div class="post-header">
-                    <div class="post-avatar">${post.author[0].toUpperCase()}</div>
-                    <div class="post-meta">
-                        <span class="post-user">${post.author} ${post.isPrivate ? '🔒 (Приватная)' : ''}</span>
-                        <span class="post-date">${post.date}</span>
-                    </div>
-                </div>
-                <div class="post-card-trigger-zone" style="background: linear-gradient(135deg, ${post.cardData.bgColor1}, ${post.cardData.bgColor2});" onclick="openFullscreenCard(${post.id})">
-                     <div class="pattern-overlay" id="pattern-container-${post.id}"></div>
-                     <button style="pointer-events:none; background:${post.cardData.buttonBgColor}; color:${post.cardData.buttonTextColor}; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; z-index:10;">${post.cardData.buttonText}</button>
-                </div>
-                <div class="post-actions">
-                    <button class="action-btn" onclick="likePostAction(${post.id})">❤️ <span>${post.likes.length}</span></button>
-                    <button class="action-btn" onclick="openFullscreenCard(${post.id})">💬 <span>${post.comments.length}</span></button>
-                </div>
-            </div>
-        `;
-
-        // Видимость постов согласно ТЗ
-        if(!post.isPrivate || isMe || isAdmin || isMyFriend) {
-            feedHTML += postUI;
+    // Каскадный выброс
+    setTimeout(() => {
+        for(let i=0; i<30; i++) {
+            const p = document.createElement('div'); p.className = 'particle'; p.textContent = curFx;
+            p.style.left = '50%'; p.style.top = '40%';
+            p.style.setProperty('--dx', `${(Math.random() - 0.5) * 280}px`);
+            p.style.setProperty('--dy', `${(Math.random() - 0.5) * 280}px`);
+            anim.appendChild(p);
         }
-        adminHTML += postUI;
-    });
+    }, state.anim === 'poop' ? 650 : 100);
 
-    feed.innerHTML = feedHTML || '<p style="text-align:center; color:#999;">Лента публичных открыток пуста.</p>';
-    if(adminGrid) adminGrid.innerHTML = adminHTML;
-
-    // Отрисовка мини-плиток паттернов для каждого контейнера в ленте
-    appState.posts.forEach(post => {
-        const block = document.getElementById(`pattern-container-${post.id}`);
-        if(block) drawPatternGrid(block, post.cardData);
-    });
+    // ПОЛНОЕ ИСЧЕЗНОВЕНИЕ ИЗ DOM-ДЕРЕВА ЧЕРЕЗ 2.5 СЕКУНДЫ
+    setTimeout(() => { anim.innerHTML = ''; }, 2500);
 }
 
-// Открытие модального окна просмотра
-window.openFullscreenCard = function(postId) {
-    const post = appState.posts.find(p => p.id === postId);
-    if(!post) return;
+// --- ЛЕНТА И СОЦИАЛЬНЫЙ ФУНКЦИОНАЛ ---
+function createPostBlock(p) {
+    const me = appState.user?.name;
+    const isOwner = me === p.author;
+    const isAdmin = appState.user?.role === 'admin';
+    const hasLiked = p.likes.includes(me);
+    
+    // Логика базовых аватарок по первой букве (Правка 3)
+    const letter = p.author.charAt(0).toUpperCase();
 
-    const modal = document.getElementById('cardModal');
-    const stage = document.getElementById('modalCardRenderStage');
+    let controlBar = '';
+    if(isOwner) {
+        controlBar = `<button class="secondary-btn" style="width:auto; padding:4px 12px; font-size:11px;" onclick="switchPostPrivacy(${p.id})">${p.isPrivate?'Сделать Публичной 🔓':'Сделать Приватной 🔒'}</button> <button class="secondary-btn" style="width:auto; padding:4px 12px; font-size:11px; color:red;" onclick="removePost(${p.id})">🗑 Удалить</button>`;
+    } else if(isAdmin) {
+        controlBar = `<button class="secondary-btn" style="width:auto; padding:4px 12px; font-size:11px; color:red;" onclick="removePost(${p.id})">🛠 Админ-Удаление</button>`;
+    }
 
-    stage.innerHTML = `
-        <div style="background: linear-gradient(135deg, ${post.cardData.bgColor1}, ${post.cardData.bgColor2}); padding: 60px 20px; text-align:center; border-radius:8px; position:relative; overflow:hidden;">
-             <div class="pattern-overlay" id="modalInternalPattern"></div>
-             <button id="modalInternalOpenBtn" class="primary-btn" style="width:auto; position:relative; z-index:10; background:${post.cardData.buttonBgColor}; color:${post.cardData.buttonTextColor};">${post.cardData.buttonText}</button>
-             <div id="mText" class="hidden-preview-element" style="color:${post.cardData.textColor}; margin-top:18px; font-weight:${post.cardData.textBold?'bold':'normal'}; text-align:${post.cardData.textCenter?'center':'left'}; font-size:16px;">${post.cardData.text}</div>
-             <div id="mStickers" class="hidden-preview-element" style="font-size:22px; margin-top:12px;">${post.cardData.stickers ? post.cardData.stickers.join(' ') : ''}</div>
-             <div id="mPhotos" class="hidden-preview-element" style="margin-top:12px;">${post.cardData.photos ? post.cardData.photos.map(src => `<img src="${src}" style="width:${post.cardData.photoSize}px; margin:4px; border-radius:6px;">`).join('') : ''}</div>
-             <div id="modalInternalAnimStage"></div>
+    return `
+        <div class="post-card">
+            <div class="post-header" onclick="viewUserProfile('${p.author}')">
+                <div class="letter-avatar">${letter}</div>
+                <div><b>${p.author}</b> ${p.isPrivate?'🔒 Приватная':''} ${p.receiver?`➡️ для @${p.receiver}`:''}<br><small>${p.date}</small></div>
+            </div>
+            <div class="card-stage" style="background:linear-gradient(135deg, ${p.data.bg1}, ${p.data.bg2})" onclick="openCardModal(${p.id})">
+                <div id="feed-patt-${p.id}" class="pattern-layer"></div>
+                <button class="card-action-btn primary-btn" style="pointer-events:none; background:${p.data.btnBg}; color:${p.data.btnColor}; font-size:13px; padding:6px 16px;">${p.data.btnText}</button>
+            </div>
+            <div class="post-actions">
+                <button class="icon-btn" onclick="likePost(${p.id})">${hasLiked?'❤️':'🤍'} ${p.likes.length}</button>
+                <button class="icon-btn" onclick="openCardModal(${p.id})">💬 ${p.comments.length}</button>
+                <button class="icon-btn" onclick="copyCardLink(${p.id})">🔗 Ссылка</button>
+            </div>
+            ${controlBar ? `<div style="padding:8px 20px; background:#fffbfb; border-top:1px solid #fff0ec; text-align:right;">${controlBar}</div>` : ''}
         </div>
     `;
+}
 
-    drawPatternGrid(document.getElementById('modalInternalPattern'), post.cardData);
-
-    document.getElementById('modalInternalOpenBtn').addEventListener('click', () => {
-        executeCardCoreAnimation('modalInternalAnimStage', post.cardData, 'mText', 'mStickers', 'mPhotos');
-    });
-
-    renderCommentsList(post);
-    modal.style.display = 'flex';
+function renderFeed(filterQuery = '') {
+    const f = document.getElementById('instagramFeed'); if(!f) return;
+    let code = '';
     
-    document.getElementById('addCommentForm').style.display = appState.currentUser ? 'flex' : 'none';
-    document.getElementById('submitCommentBtn').onclick = () => {
-        const inp = document.getElementById('commentTextInput');
-        if(inp.value.trim() && appState.currentUser) {
-            post.comments.push({ user: appState.currentUser.name, text: inp.value.trim() });
-            localStorage.setItem('p_posts', JSON.stringify(appState.posts));
-            renderCommentsList(post);
-            renderFeed();
-            inp.value = '';
-        }
-    };
-};
-
-function renderCommentsList(post) {
-    document.getElementById('modalCommentsList').innerHTML = post.comments.map(c => `
-        <p><b>${c.user}:</b> ${c.text}</p>
-    `).join('');
-}
-
-window.likePostAction = function(postId) {
-    if(!appState.currentUser) { alert('Лайки доступны только после авторизации!'); return; }
-    const post = appState.posts.find(p => p.id === postId);
-    const uName = appState.currentUser.name;
-
-    if(post.likes.includes(uName)) {
-        post.likes = post.likes.filter(x => x !== uName);
-    } else {
-        post.likes.push(uName);
-    }
-    localStorage.setItem('p_posts', JSON.stringify(appState.posts));
-    renderFeed();
-};
-
-// Система авторизации и управления правами доступа (Роли)
-function initAuthEngine() {
-    document.getElementById('loginBtn').addEventListener('click', () => {
-        const u = document.getElementById('usernameInput').value.trim();
-        const p = document.getElementById('passwordInput').value.trim();
-        if(appState.usersDB[u] && appState.usersDB[u].password === p) {
-            authorizeUserSession(u);
-        } else {
-            alert('Неверные данные учетной записи!');
-        }
-    });
-
-    document.getElementById('registerBtn').addEventListener('click', () => {
-        const u = document.getElementById('usernameInput').value.trim();
-        const p = document.getElementById('passwordInput').value.trim();
-        if(!u || !p) return alert('Заполните пустые поля!');
-        if(appState.usersDB[u]) return alert('Пользователь уже существует!');
-
-        appState.usersDB[u] = { password: p, role: 'user', friends: [], historyIn: [], historyOut: [] };
-        localStorage.setItem('p_users', JSON.stringify(appState.usersDB));
-        authorizeUserSession(u);
-    });
-
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        appState.currentUser = null;
-        document.getElementById('userProfileBlock').style.display = 'none';
-        document.getElementById('loginForm').style.display = 'block';
-        document.getElementById('tabAdminLink').style.display = 'none';
-        document.getElementById('sideAdminLink').style.display = 'none';
-        document.getElementById('newsAdminPanel').style.display = 'none';
-        renderFeed();
-    });
-
-    document.getElementById('addFriendBtn').addEventListener('click', () => {
-        const target = document.getElementById('friendNameInput').value.trim();
-        if(appState.usersDB[target] && target !== appState.currentUser.name) {
-            if(!appState.usersDB[appState.currentUser.name].friends.includes(target)) {
-                appState.usersDB[appState.currentUser.name].friends.push(target);
-                localStorage.setItem('p_users', JSON.stringify(appState.usersDB));
-                syncProfileUI();
-                renderFeed();
+    appState.posts.forEach(p => {
+        // qweezer (Администратор) видит вообще все открытки без исключения! (Правка 4)
+        const isViewableByAdmin = appState.user?.role === 'admin';
+        const isMyPost = appState.user && p.author === appState.user.name;
+        const isForMe = appState.user && p.receiver === appState.user.name;
+        
+        if(!p.isPrivate || isViewableByAdmin || isMyPost || isForMe) {
+            if(p.author.toLowerCase().includes(filterQuery.toLowerCase())) {
+                code += createPostBlock(p);
             }
-        } else {
-            alert('Пользователь не зарегистрирован!');
         }
     });
+    
+    f.innerHTML = code || '<p style="text-align:center; padding:20px; color:#999;">В ленте пустует...</p>';
+    appState.posts.forEach(p => { drawPatternEngine(`feed-patt-${p.id}`, p.data); });
 }
 
-function authorizeUserSession(username) {
-    appState.currentUser = { name: username, role: appState.usersDB[username].role };
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('userProfileBlock').style.display = 'block';
-    document.getElementById('currentUserName').textContent = username;
-    document.getElementById('currentUserRole').textContent = appState.currentUser.role;
+// --- ОКНО ПРОСМОТРА ОТКРЫТКИ ---
+window.openCardModal = function(id) {
+    const p = appState.posts.find(x => x.id === id); if(!p) return alert('Объект не найден');
+    const m = document.getElementById('cardModal');
+    
+    // Сброс анимаций
+    document.getElementById('modalBtn').style.display = 'inline-block';
+    document.getElementById('modalContent').classList.remove('visible');
+    document.getElementById('modalAmbient').classList.remove('active');
+    
+    const st = p.data;
+    document.getElementById('modalStage').style.background = `linear-gradient(135deg, ${st.bg1}, ${st.bg2})`;
+    drawPatternEngine('modalPattern', st);
+    
+    const btn = document.getElementById('modalBtn');
+    btn.textContent = st.btnText; btn.style.color = st.btnColor;
+    btn.style.background = st.btnPhoto ? `url(${st.btnPhoto}) center/cover` : st.btnBg;
+    btn.className = 'card-action-btn primary-btn ' + (st.buttonStyle==='glass'?'btn-glass':'');
+    btn.style.borderRadius = st.buttonStyle==='rounded'?'50px':'10px';
 
-    if(appState.currentUser.role === 'admin') {
-        document.getElementById('tabAdminLink').style.display = 'block';
-        document.getElementById('sideAdminLink').style.display = 'block';
-        document.getElementById('newsAdminPanel').style.display = 'block';
-        bindAdminControls();
+    const txt = document.getElementById('modalText');
+    txt.textContent = st.text; txt.style.color = st.color; txt.className = `card-text ${st.font}`;
+    txt.style.textAlign = st.align ? 'center' : 'left'; txt.style.fontWeight = st.bold ? 'bold' : 'normal';
+
+    btn.onclick = () => runAnimationEngine('modal', st);
+    
+    // Нагрузка комментариев
+    document.getElementById('commentsList').innerHTML = p.comments.map(c => `<div><b>${c.user}:</b> ${c.text}</div>`).join('');
+    document.getElementById('commentForm').style.display = appState.user ? 'flex' : 'none';
+    
+    document.getElementById('sendCommentBtn').onclick = () => {
+        const val = document.getElementById('commentText').value.trim();
+        if(val && appState.user) {
+            p.comments.push({ user: appState.user.name, text: val });
+            localStorage.setItem('pk_v2_posts', JSON.stringify(appState.posts));
+            openCardModal(id);
+            document.getElementById('commentText').value = '';
+        }
+    };
+    m.style.display = 'flex';
+};
+
+document.getElementById('closeCardModalBtn').onclick = () => document.getElementById('cardModal').style.display = 'none';
+
+// --- СИСТЕМА ВХОДЯЩИХ И ИСХОДЯЩИХ ---
+function renderHistory() {
+    if(!appState.user) return;
+    const name = appState.user.name;
+    
+    const incZone = document.getElementById('incomingCards');
+    const outZone = document.getElementById('outgoingCards');
+    
+    const incoming = appState.posts.filter(p => p.receiver === name);
+    const outgoing = appState.posts.filter(p => p.author === name && p.receiver !== null);
+    
+    document.getElementById('incomingCount').textContent = incoming.length;
+    document.getElementById('outgoingCount').textContent = outgoing.length;
+
+    const mapper = list => list.map(p => `<div class="sidebar-box flex-row" style="justify-content:space-between; margin-bottom:8px; padding:12px;"><span><b>От:</b> ${p.author} (${p.date})</span><button class="primary-btn" style="width:auto; padding:6px 14px;" onclick="openCardModal(${p.id})">Просмотр</button></div>`).join('');
+    
+    incZone.innerHTML = mapper(incoming) || '<p class="hint-text">Входящих пакетов не обнаружено</p>';
+    outZone.innerHTML = mapper(outgoing) || '<p class="hint-text">Вы еще ничего не отправляли лично</p>';
+}
+
+// --- ПРОФИЛИ ---
+window.viewUserProfile = function(name) {
+    const u = appState.db[name]; if(!u) return;
+    document.getElementById('viewUserLetterAvatar').textContent = name.charAt(0);
+    document.getElementById('viewUsername').textContent = name;
+    document.getElementById('viewBio').textContent = u.bio || 'Пользователь не оставил заметок о себе.';
+    
+    let html = '';
+    appState.posts.filter(p => p.author === name && !p.isPrivate).forEach(p => html += createPostBlock(p));
+    document.getElementById('viewUserFeed').innerHTML = html || '<p>У пользователя нет публичных открыток.</p>';
+    
+    changeTab('viewUser');
+};
+
+function loadMyProfile() {
+    if(!appState.user) return;
+    document.getElementById('myLetterAvatar').textContent = appState.user.name.charAt(0);
+    document.getElementById('myUsername').textContent = appState.user.name;
+    document.getElementById('myBio').textContent = appState.user.bio || 'Биография отсутствует';
+    document.getElementById('editBio').value = appState.user.bio || '';
+    
+    document.getElementById('saveProfileBtn').onclick = () => {
+        const bio = document.getElementById('editBio').value;
+        appState.user.bio = bio;
+        appState.db[appState.user.name].bio = bio;
+        saveDB(); syncAuthInterface(); loadMyProfile();
+        alert('Данные обновлены!');
+    };
+}
+
+// --- УТИЛИТАРНЫЕ СВЯЗИ ---
+window.likePost = id => { if(!appState.user) return alert('Только авторизованные пользователи могут ставить лайки!'); const p=appState.posts.find(x=>x.id===id); p.likes.includes(appState.user.name) ? p.likes=p.likes.filter(x=>x!==appState.user.name) : p.likes.push(appState.user.name); localStorage.setItem('pk_v2_posts', JSON.stringify(appState.posts)); renderFeed(); };
+window.removePost = id => { if(confirm('Удалить открытку безвозвратно?')) { appState.posts = appState.posts.filter(x=>x.id!==id); localStorage.setItem('pk_v2_posts', JSON.stringify(appState.posts)); renderFeed(); } };
+window.switchPostPrivacy = id => { const p=appState.posts.find(x=>x.id===id); p.isPrivate = !p.isPrivate; localStorage.setItem('pk_v2_posts', JSON.stringify(appState.posts)); renderFeed(); };
+window.copyCardLink = id => { const link = window.location.origin + window.location.pathname + '?card=' + id; navigator.clipboard.writeText(link); alert('Уникальный URL скопирован в буфер обмена!'); };
+window.closeModal = id => document.getElementById(id).style.display = 'none';
+
+function saveDB() { localStorage.setItem('pk_v2_users', JSON.stringify(appState.db)); }
+
+// --- УПРАВЛЕНИЕ АДМИНИСТРАТОРА (qweezer) ---
+function renderAdminTable() {
+    let rows = '';
+    for(let login in appState.db) {
+        rows += `<tr><td><b>@${login}</b></td><td style="font-family:monospace; color:red;">${appState.db[login].pass}</td><td><span class="role-badge">${appState.db[login].role}</span></td></tr>`;
     }
-    syncProfileUI();
-    renderFeed();
+    document.getElementById('adminUserTable').innerHTML = rows;
 }
 
-// Синхронизация архивов входящих/исходящих историй и списков друзей
-function syncProfileUI() {
-    const data = appState.usersDB[appState.currentUser.name];
-    document.getElementById('friendsList').innerHTML = data.friends.map(f => `<li>👤 ${f}</li>`).join('');
+document.getElementById('saveGlobalSettings').onclick = () => {
+    const s = appState.settings;
+    s.mainColor = document.getElementById('admMainColor').value;
+    s.accentColor = document.getElementById('admAccentColor').value;
+    s.bgColor = document.getElementById('admBgColor').value;
+    s.logo = document.getElementById('globalLogo').value || '🌸 PinkCards';
 
-    // Наполнение поповера исходящих
-    document.getElementById('historyOutPopover').innerHTML = data.historyOut.length ? data.historyOut.map(id => `
-        <div class="popover-item" onclick="openFullscreenCard(${id})">Открытка #${id}</div>
-    `).join('') : 'Нет отправленных';
+    const bgFile = document.getElementById('globalBg').files[0];
+    if(bgFile) {
+        const r = new FileReader();
+        r.onload = e => { s.bgImg = e.target.result; saveSettingsObj(); };
+        r.readAsDataURL(bgFile);
+    } else {
+        saveSettingsObj();
+    }
+};
 
-    // Наполнение поповера входящих на основе списка друзей (вычисляется из БД)
-    let inboundHTML = '';
-    appState.posts.forEach(post => {
-        if(data.friends.includes(post.author)) {
-            inboundHTML += `<div class="popover-item" onclick="openFullscreenCard(${post.id})">От ${post.author} (${post.date})</div>`;
-        }
-    });
-    document.getElementById('historyInPopover').innerHTML = inboundHTML || 'Входящих архивов нет';
+function saveSettingsObj() {
+    localStorage.setItem('pk_v2_set', JSON.stringify(appState.settings));
+    applyDesignSettings();
+    alert('Глобальная визуальная тема изменена!');
 }
 
-// Система Панели Администратора (Для учетной записи qweezer)
-function bindAdminControls() {
-    document.getElementById('postNewsBtn').onclick = () => {
-        const text = document.getElementById('newsText').value.trim();
-        if(text) {
-            appState.news.unshift({ text: text, date: new Date().toLocaleDateString() });
-            localStorage.setItem('p_news', JSON.stringify(appState.news));
-            renderNews();
-            document.getElementById('newsText').value = '';
-            alert('Новость добавлена!');
-        }
-    };
+function renderNewsFeed() { document.getElementById('newsList').innerHTML = appState.news.map(n => `<div class="sidebar-box"><small style="color:var(--orange)"><b>${n.date}</b></small><p style="margin-top:6px;">${n.text}</p></div>`).join(''); }
+document.getElementById('postNewsBtn').onclick = () => { const t=document.getElementById('newsInput').value.trim(); if(t){ appState.news.unshift({date:new Date().toLocaleDateString(), text:t}); localStorage.setItem('pk_v2_news', JSON.stringify(appState.news)); renderNewsFeed(); document.getElementById('newsInput').value=''; } };
+function renderFriendsList() { document.getElementById('friendsList').innerHTML = (appState.user?.friends || []).map(f => `<li><a href="#" onclick="viewUserProfile('${f}')">@${f}</a></li>`).join(''); }
+document.getElementById('addFriendBtn').onclick = () => { const f=document.getElementById('friendSearch').value.trim(); if(appState.db[f] && f!==appState.user.name){ appState.user.friends.push(f); appState.db[appState.user.name].friends = appState.user.friends; saveDB(); renderFriendsList(); document.getElementById('friendSearch').value=''; } else alert('Пользователь не найден!'); };
 
-    document.getElementById('saveAdminLogo').onclick = () => {
-        appState.siteSettings.logo = document.getElementById('adminLogoText').value;
-        localStorage.setItem('p_settings', JSON.stringify(appState.siteSettings));
-        applyGlobalSettings();
-        alert('Логотип обновлен!');
-    };
-
-    document.getElementById('adminSiteBg').onchange = (e) => {
-        if(e.target.files && e.target.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                appState.siteSettings.bg = ev.target.result;
-                localStorage.setItem('p_settings', JSON.stringify(appState.siteSettings));
-                applyGlobalSettings();
-            };
-            reader.readAsDataURL(e.target.files[0]);
-        }
-    };
-
-    document.getElementById('resetAdminBg').onclick = () => {
-        appState.siteSettings.bg = '';
-        localStorage.setItem('p_settings', JSON.stringify(appState.siteSettings));
-        applyGlobalSettings();
-    };
-}
-
-function renderNews() {
-    const container = document.getElementById('newsContainer');
-    if(container) container.innerHTML = appState.news.map(n => `
-        <div class="news-item">
-            <strong>[${n.date}] Оповещение системы:</strong>
-            <p>${n.text}</p>
-        </div>
-    `).join('');
+function checkParamsRoute() {
+    const p = new URLSearchParams(window.location.search);
+    if(p.get('card')) { setTimeout(() => openCardModal(parseInt(p.get('card'))), 400); }
 }
