@@ -3,40 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Конструктор открыток</title>
+    <title>Otkoiminyashkaa - Создай открытку</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="start-container">
-        <div class="hero-section">
-            <h1>🎨 Создай уникальную открытку</h1>
-            <p>Выбери стиль, добавь эмодзи и фото, настрой фон — и поделись с друзьями!</p>
-            <button id="startCreateBtn" class="start-btn">✨ Создать открытку</button>
+    <header class="site-header">
+        <div class="logo-area" id="logoArea">
+            <span class="logo-icon" id="logoIcon">💌</span>
+            <h1 class="site-title" id="siteTitle">Otkoiminyashkaa</h1>
         </div>
-        
-        <div class="features">
-            <div class="feature">
-                <div class="feature-icon">🎨</div>
-                <h3>Полная кастомизация</h3>
-                <p>Цвета, фон, паттерны, стикеры и фото</p>
+        <button class="menu-btn" id="menuBtn">☰</button>
+    </header>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="side-menu" id="sideMenu">
+        <div class="menu-header"><h3>Меню</h3><button class="close-menu" id="closeMenu">✖</button></div>
+        <div class="menu-content" id="menuContent"></div>
+    </div>
+
+    <!-- ГЛАВНАЯ ЛЕНТА (ПУБЛИЧНЫЕ ОТКРЫТКИ) -->
+    <div class="feed-container" id="feedContainer">
+        <div class="feed-header">
+            <h2>📱 Лента открыток</h2>
+            <p>Смотрите открытки других пользователей, ставьте лайки и комментируйте!</p>
+        </div>
+        <div class="create-feed-btn" id="createFeedBtn">
+            <button class="big-create-btn">🎨 Создать свою открытку</button>
+        </div>
+        <div class="auth-buttons" id="authButtons">
+            <button id="showLoginBtnHeader" class="auth-btn">🔑 Войти</button>
+            <button id="showRegisterBtnHeader" class="auth-btn">📝 Регистрация</button>
+        </div>
+        <div class="site-description">
+            <p>💌 <strong>Otkoiminyashkaa</strong> — это место, где ты можешь создавать красивые открытки, делиться ими с друзьями и получать тёплые отзывы. Выбирай анимации, добавляй фото и эмодзи, настраивай фон — сделай свою открытку уникальной!</p>
+        </div>
+        <div class="feed-list" id="feedList"></div>
+    </div>
+
+    <!-- МОДАЛКА КОММЕНТАРИЕВ -->
+    <div class="comments-modal" id="commentsModal">
+        <div class="comments-modal-content">
+            <div class="comments-header">
+                <h3>💬 Комментарии</h3>
+                <button class="close-comments" id="closeCommentsBtn">✖</button>
             </div>
-            <div class="feature">
-                <div class="feature-icon">📝</div>
-                <h3>Любой текст</h3>
-                <p>Напиши то, что хочешь сказать</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">🖼️</div>
-                <h3>Свои фото</h3>
-                <p>Загрузи картинки и двигай их</p>
+            <div class="comments-list" id="commentsList"></div>
+            <div class="add-comment">
+                <input type="text" id="commentInput" placeholder="Написать комментарий...">
+                <button id="sendCommentBtn">📤</button>
             </div>
         </div>
     </div>
-    
-    <script>
-        document.getElementById('startCreateBtn').addEventListener('click', () => {
-            window.location.href = 'editor.html';
-        });
-    </script>
+
+    <!-- МОДАЛКИ АВТОРИЗАЦИИ -->
+    <div class="modal" id="loginModal">
+        <h3>🔑 Вход</h3>
+        <input type="text" id="loginUsername" placeholder="Имя пользователя">
+        <input type="password" id="loginPassword" placeholder="Пароль">
+        <button id="loginSubmitBtn">Войти</button>
+        <button class="modal-close">Закрыть</button>
+        <p>Нет аккаунта? <a href="#" id="switchToRegister">Зарегистрируйтесь</a></p>
+    </div>
+
+    <div class="modal" id="registerModal">
+        <h3>📝 Регистрация</h3>
+        <input type="text" id="regUsername" placeholder="Имя пользователя">
+        <input type="password" id="regPassword" placeholder="Пароль">
+        <button id="registerSubmitBtn">Зарегистрироваться</button>
+        <button class="modal-close">Закрыть</button>
+        <p>Уже есть аккаунт? <a href="#" id="switchToLogin">Войдите</a></p>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
