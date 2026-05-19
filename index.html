@@ -3,320 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>(0_0)otkoiminyashkaa — Социальная сеть открыток</title>
+    <title>(0_0)otkoiminyashkaa — Конструктор интерактивных открыток</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <header class="site-header">
-        <div class="header-left">
-            <div class="logo" id="siteLogoBtn">(0_0)otkoiminyashkaa</div>
-        </div>
-        <nav class="header-center-nav">
-            <button class="nav-inline-btn active" onclick="changeTab('feed')">🌍 Публичные открытки</button>
-            <button class="nav-inline-btn" onclick="changeTab('create')">🎨 Создать открытку</button>
-            <button class="nav-inline-btn" onclick="changeTab('news')">📰 Новости</button>
-        </nav>
-        <div class="header-right">
-            <button class="burger-menu" id="burgerBtn">☰</button>
-        </div>
+        <div class="logo" id="siteLogoBtn">(0_0)otkoiminyashkaa</div>
+        <div class="header-status">✨ Генератор персональных поздравлений</div>
     </header>
 
-    <nav class="side-menu" id="sideMenu">
-        <button class="close-menu" id="closeMenuBtn">×</button>
-        
-        <div id="authSidebarBlock" class="sidebar-box">
-            <h4>🔐 Вход в сеть</h4>
-            <input type="text" id="usernameInput" placeholder="Ваш никнейм">
-            <input type="password" id="passwordInput" placeholder="Пароль">
-            <button id="loginBtn" class="primary-btn">Войти</button>
-            <button id="registerBtn" class="secondary-btn" style="margin-top:8px;">Зарегистрироваться</button>
-        </div>
-
-        <div id="userProfileSidebarBlock" class="sidebar-box" style="display: none;">
-            <div class="user-mini-profile">
-                <div id="sidebarLetterAvatar" class="letter-avatar">?</div>
-                <div>
-                    <p><strong id="sidebarUserName">User</strong></p>
-                    <span id="sidebarUserRole" class="role-badge">User</span>
-                </div>
-            </div>
-            <button id="logoutBtn" class="secondary-btn" style="margin-top:12px; width:100%;">Выйти</button>
-        </div>
-
-        <div class="menu-items" id="authMenuLinks" style="display: none;">
-            <a href="#" onclick="changeTab('profile')">👤 Настройки профиля</a>
-            <a href="#" onclick="changeTab('history')">📬 История (Входящие / Изделия)</a>
-            <a href="#" onclick="changeTab('friends')">👥 Мои Друзья</a>
-            <a href="#" onclick="changeTab('admin')" id="adminLink" style="display:none; color: #ed4956; font-weight:bold;">🛠 Панель qweezer</a>
-        </div>
-        <div style="margin-top:20px; text-align:center;">
-            <button onclick="syncWithCloud()" class="secondary-btn" style="font-size:11px; padding:6px;">🔄 Синхронизировать сеть вручную</button>
-        </div>
-    </nav>
-
     <main class="main-container">
-
-        <section id="feedTab" class="tab-content active">
-            <div class="search-container">
-                <input type="text" id="userSearchInput" class="search-input" placeholder="🔍 Поиск открыток по автору...">
+        
+        <section id="viewModeZone" class="card-view-wrapper" style="display: none;">
+            <div class="view-card-box">
+                <div id="viewStage" class="card-stage large-stage">
+                    <div id="viewPattern" class="pattern-layer"></div>
+                    <button id="viewBtn" class="card-action-btn"></button>
+                    <div id="viewContent" class="card-hidden-content">
+                        <div id="viewText" class="card-text"></div>
+                        <div id="viewMovableZone" class="movable-zone"></div>
+                    </div>
+                    <div id="viewAmbient" class="ambient-layer"></div>
+                    <div id="viewAnim" class="anim-layer"></div>
+                </div>
+                <button onclick="window.location.search = ''" class="secondary-btn" style="margin-top: 15px; max-width: 300px;">🎨 Создать свою открытку</button>
             </div>
-            <div id="instagramFeed" class="feed-grid"></div>
         </section>
 
-        <section id="createTab" class="tab-content">
-            <div class="editor-layout">
-                <div class="editor-panel">
-                    <h3>Конструктор открытки</h3>
+        <section id="editorModeZone" class="editor-layout">
+            
+            <div class="editor-panel">
+                <h2>Мастерская открытки</h2>
+                <p class="hint-text">Настройте оформление и отправьте секретную ссылку другу</p>
+                
+                <div class="editor-tabs">
+                    <button class="ed-tab-btn active" data-edtab="ed-text">✍️ Текст</button>
+                    <button class="ed-tab-btn" data-edtab="ed-btn">🕹️ Кнопка</button>
+                    <button class="ed-tab-btn" data-edtab="ed-bg">🎨 Фон</button>
+                    <button class="ed-tab-btn" data-edtab="ed-decor">🌸 Декор и FX</button>
+                </div>
+
+                <div id="ed-text" class="ed-tab-content active">
+                    <label>Текст внутри открытки</label>
+                    <textarea id="cardText" placeholder="Напишите поздравление или секретное послание..."></textarea>
                     
-                    <div class="editor-tabs">
-                        <button class="ed-tab-btn active" data-edtab="ed-text">Текст</button>
-                        <button class="ed-tab-btn" data-edtab="ed-btn">Кнопка</button>
-                        <button class="ed-tab-btn" data-edtab="ed-bg">Фон</button>
-                        <button class="ed-tab-btn" data-edtab="ed-decor">Декор и Анимации</button>
+                    <label>Выбор шрифта</label>
+                    <select id="cardFont">
+                        <option value="font-sans">Современный округлый (Sans)</option>
+                        <option value="font-serif">Элегантный классический (Serif)</option>
+                        <option value="font-cursive">Романтичный рукописный (Cursive)</option>
+                    </select>
+                    
+                    <div class="flex-row" style="margin-bottom: 12px;">
+                        <label class="checkbox-label"><input type="checkbox" id="textCenter" checked> Выравнивание по центру</label>
+                        <label class="checkbox-label"><input type="checkbox" id="textBold"> Жирный текст</label>
                     </div>
-
-                    <div id="ed-text" class="ed-tab-content active">
-                        <label>Текст поздравления</label>
-                        <textarea id="cardText" placeholder="Введите ваше праздничное послание..."></textarea>
-                        
-                        <label>Шрифт текста</label>
-                        <select id="cardFont">
-                            <option value="font-sans">Стандартный аккуратный</option>
-                            <option value="font-serif">Классический с засечками</option>
-                            <option value="font-cursive">Красивый рукописный</option>
-                        </select>
-                        
-                        <div class="flex-row" style="margin-bottom: 12px;">
-                            <label><input type="checkbox" id="textCenter"> По центру</label>
-                            <label><input type="checkbox" id="textBold"> Жирный шрифт</label>
-                        </div>
-                        
-                        <div class="range-group">
-                            <label>Размер текста: <input type="range" id="textSize" min="14" max="40" value="20"></label>
-                        </div>
-                        <label>Цвет надписи: <input type="color" id="textColor" value="#2c2c2c"></label>
+                    
+                    <label>Размер шрифта</label>
+                    <div class="range-group">
+                        <input type="range" id="textSize" min="16" max="42" value="24">
                     </div>
+                    
+                    <label>Цвет букв</label>
+                    <input type="color" id="textColor" value="#2c2c2c">
+                </div>
 
-                    <div id="ed-btn" class="ed-tab-content">
-                        <label>Надпись на кнопке</label>
-                        <input type="text" id="buttonText" value="Открыть открытку">
-                        
-                        <label>Стиль кнопки</label>
-                        <select id="buttonStyle">
-                            <option value="rounded">Округлая (Капсула)</option>
-                            <option value="glow">Неоновое свечение</option>
-                            <option value="glass">Матовое стекло</option>
-                        </select>
-                        
-                        <div class="range-group">
-                            <label>Размер кнопки: <input type="range" id="buttonSize" min="12" max="24" value="16"></label>
-                        </div>
-                        
-                        <label>Фон кнопки: <input type="color" id="buttonBgColor" value="#faceb1"></label>
-                        <label>Текст кнопки: <input type="color" id="buttonTextColor" value="#ffffff"></label>
-                        <label>Изображение на кнопку: <input type="file" id="btnPhotoInput" accept="image/*"></label>
+                <div id="ed-btn" class="ed-tab-content">
+                    <label>Текст на кнопке (который заставит кликнуть)</label>
+                    <input type="text" id="buttonText" value="Открыть открытку 💌">
+                    
+                    <label>Форма и визуальный стиль</label>
+                    <select id="buttonStyle">
+                        <option value="rounded">Округлая капсула</option>
+                        <option value="glow">Неоновое сияние</option>
+                        <option value="glass">Матовое стекло (Glassmorphism)</option>
+                        <option value="rect">Строгий прямоугольник</option>
+                    </select>
+                    
+                    <label>Размер текста кнопки</label>
+                    <div class="range-group">
+                        <input type="range" id="buttonSize" min="12" max="26" value="16">
                     </div>
-
-                    <div id="ed-bg" class="ed-tab-content">
-                        <label>Первый цвет градиента: <input type="color" id="bgColor1" value="#faceb1"></label>
-                        <label>Второй цвет градиента: <input type="color" id="bgColor2" value="#ffa58a"></label>
-                        <hr>
-                        <label>Загрузить PNG-паттерн (узор поверх фона): <input type="file" id="patternInput" accept="image/*"></label>
-                        <div class="range-group">
-                            <label>Размер картинок узора: <input type="range" id="patternSize" min="20" max="120" value="45"></label>
+                    
+                    <div class="flex-row">
+                        <div style="flex:1;">
+                            <label>Цвет кнопки</label>
+                            <input type="color" id="buttonBgColor" value="#faceb1">
                         </div>
-                        <div class="range-group">
-                            <label>Прозрачность узора: <input type="range" id="patternOpacity" min="5" max="100" value="35"></label>
+                        <div style="flex:1;">
+                            <label>Цвет текста</label>
+                            <input type="color" id="buttonTextColor" value="#ffffff">
                         </div>
                     </div>
+                    
+                    <label style="margin-top:10px; display:block;">Фото-фон для кнопки (заменяет цвет)</label>
+                    <input type="file" id="btnPhotoInput" accept="image/*">
+                </div>
 
-                    <div id="ed-decor" class="ed-tab-content">
-                        <label>Добавить фото в открытку: <input type="file" id="photoInput" accept="image/*"></label>
-                        <div class="range-group">
-                            <label>Размер добавленных фото: <input type="range" id="photoSizeRange" min="40" max="200" value="90"></label>
-                        </div>
-
-                        <label>Японские текстовые эмодзи (Кликните для добавления):</label>
-                        <div class="kaomoji-grid" id="kaomojiContainer"></div>
-
-                        <div class="flex-row" style="margin-top:10px;">
-                            <input type="text" id="customEmoji" maxlength="6" placeholder="Или свой эмодзи/символ">
-                            <button id="addCustomEmojiBtn" class="primary-btn" style="width:auto;">+</button>
-                        </div>
-
-                        <hr style="margin:15px 0;">
-                        <label>Какая анимация сработает при открытии?</label>
-                        <select id="animationType">
-                            <option value="gift">🎉 Подарок (Взрыв яркого конфетти)</option>
-                            <option value="poop">💩 Сюрприз (Падение с брызгами)</option>
-                            <option value="bouquet">💐 Букет (Разлетающиеся цветы)</option>
-                            <option value="fart">💨 Пук (Разящие волны газа)</option>
-                            <option value="fall">📦 Упало (Тяжелое падение с отскоком)</option>
-                        </select>
+                <div id="ed-bg" class="ed-tab-content">
+                    <label>Градиент подложки открытки</label>
+                    <div class="flex-row">
+                        <input type="color" id="bgColor1" value="#faceb1">
+                        <span>➡️</span>
+                        <input type="color" id="bgColor2" value="#ffa58a">
                     </div>
-
-                    <div style="margin-top:20px; border-top: 1px solid #fee; padding-top:15px;">
-                        <label>Кому отправить открытку? (Никнейм)</label>
-                        <input type="text" id="receiverInput" placeholder="Оставьте пустым для общей ленты">
-                        <label><input type="checkbox" id="isPrivate"> 🔒 Доступ только по прямой ссылке (Приватная)</label>
-                        <button id="publishBtn" class="primary-btn" style="margin-top:12px; font-size:16px;">🚀 Загрузить в глобальную сеть</button>
+                    
+                    <hr class="editor-hr">
+                    
+                    <label>Текстурный PNG-паттерн (узор поверх градиента)</label>
+                    <input type="file" id="patternInput" accept="image/*">
+                    <p class="hint-text">Выберите маленькую прозрачную картинку, она размножится по всему холсту</p>
+                    
+                    <label>Размер элементов узора</label>
+                    <div class="range-group">
+                        <input type="range" id="patternSize" min="20" max="150" value="50">
+                    </div>
+                    
+                    <label>Прозрачность узора</label>
+                    <div class="range-group">
+                        <input type="range" id="patternOpacity" min="5" max="100" value="40">
                     </div>
                 </div>
 
-                <div class="preview-panel">
-                    <div class="preview-sticky-wrap">
-                        <h3>Интерактивный экран открытки</h3>
-                        <p class="hint-text">💡 Картинки и эмодзи внутри экрана можно свободно перетаскивать мышкой и пальцем!</p>
-                        <div id="livePreview" class="card-stage">
-                            <div id="livePattern" class="pattern-layer"></div>
-                            <button id="liveBtn" class="card-action-btn"></button>
-                            <div id="liveContent" class="card-hidden-content">
-                                <div id="liveText" class="card-text"></div>
-                                <div id="liveMovableZone" class="movable-zone"></div>
-                            </div>
-                            <div id="liveAmbient" class="ambient-layer"></div>
-                            <div id="liveAnim" class="anim-layer"></div>
+                <div id="ed-decor" class="ed-tab-content">
+                    <label>Загрузить фото внутрь открытки</label>
+                    <input type="file" id="photoInput" accept="image/*">
+                    
+                    <label>Размер добавляемых изображений</label>
+                    <div class="range-group">
+                        <input type="range" id="photoSizeRange" min="40" max="250" value="100">
+                    </div>
+
+                    <label style="margin-top:10px; display:block;">Японские каомодзи (Кликните для добавления на экран):</label>
+                    <div class="kaomoji-grid" id="kaomojiContainer"></div>
+
+                    <div class="flex-row">
+                        <input type="text" id="customEmoji" maxlength="10" placeholder="Свой символ или эмодзи...">
+                        <button id="addCustomEmojiBtn" class="action-mini-btn">+</button>
+                    </div>
+
+                    <hr class="editor-hr">
+                    
+                    <label>💥 Эффект при клике на кнопку</label>
+                    <select id="animationType">
+                        <option value="gift">🎉 Конфетти-взрыв (Подарок)</option>
+                        <option value="poop">💩 Плюх-сюрприз (Накакали)</option>
+                        <option value="bouquet">💐 Цветочный фонтан (Букет)</option>
+                        <option value="fart">💨 Газовые волны (Пук)</option>
+                        <option value="fall">📦 Падение коробки с отскоком (Упало)</option>
+                    </select>
+                </div>
+
+                <div class="share-zone">
+                    <button id="generateLinkBtn" class="primary-btn-mega">🔗 Сгенерировать ссылку для друга</button>
+                    <div id="linkResultBlock" class="link-result-block" style="display: none;">
+                        <p>Ссылка готова! Скопируйте и отправьте её:</p>
+                        <div class="flex-row">
+                            <input type="text" id="generatedUrlInput" readonly>
+                            <button id="copyUrlBtn" class="action-mini-btn">📋</button>
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
 
-        <section id="historyTab" class="tab-content">
-            <div class="history-layout">
-                <div class="history-box">
-                    <h3>📥 Личные Входящие <span class="badge" id="incomingCount">0</span></h3>
-                    <p class="hint-text">Адресованные лично вашему аккаунту</p>
-                    <div id="incomingCards" class="compact-feed-list"></div>
-                </div>
-                <div class="history-box">
-                    <h3>📤 Мои отправленные <span class="badge" id="outgoingCount">0</span></h3>
-                    <p class="hint-text">Созданные вами для конкретных пользователей</p>
-                    <div id="outgoingCards" class="compact-feed-list"></div>
-                </div>
-            </div>
-        </section>
-
-        <section id="profileTab" class="tab-content">
-            <div class="profile-header" id="myProfileBg">
-                <div class="profile-info-box">
-                    <div id="myLetterAvatar" class="letter-avatar large">?</div>
-                    <h2 id="myUsername">User</h2>
-                    <p id="myBio">Загрузка информации...</p>
+            <div class="preview-panel">
+                <div class="preview-sticky-wrap">
+                    <h3>Экран предпросмотра</h3>
+                    <p class="hint-text">👉 Перетаскивайте добавленные каомодзи и фотографии мышкой или пальцем в любое место на холсте!</p>
+                    
+                    <div id="livePreview" class="card-stage">
+                        <div id="livePattern" class="pattern-layer"></div>
+                        <button id="liveBtn" class="card-action-btn"></button>
+                        <div id="liveContent" class="card-hidden-content">
+                            <div id="liveText" class="card-text"></div>
+                            <div id="liveMovableZone" class="movable-zone"></div>
+                        </div>
+                        <div id="liveAmbient" class="ambient-layer"></div>
+                        <div id="liveAnim" class="anim-layer"></div>
+                    </div>
                 </div>
             </div>
-            <div class="editor-panel" style="margin-top:20px;">
-                <h3>Редактировать профиль в общей сети</h3>
-                <label>О себе</label>
-                <textarea id="editBio" placeholder="Расскажите о себе всему миру..."></textarea>
-                <button id="saveProfileBtn" class="primary-btn">Сохранить изменения на сервере</button>
-            </div>
-        </section>
 
-        <section id="viewUserTab" class="tab-content">
-            <div class="profile-header" id="viewUserBg">
-                <div class="profile-info-box">
-                    <div id="viewUserLetterAvatar" class="letter-avatar large">?</div>
-                    <h2 id="viewUsername">User</h2>
-                    <p id="viewBio">О себе...</p>
-                </div>
-            </div>
-            <h3 style="margin-top:20px;">Глобальные открытки автора:</h3>
-            <div id="viewUserFeed" class="feed-grid"></div>
-        </section>
-
-        <section id="newsTab" class="tab-content">
-            <div id="adminNewsBlock" class="editor-panel" style="display:none; margin-bottom:20px;">
-                <h3>Написать объявление от Администрации</h3>
-                <textarea id="newsInput" placeholder="Текст важной новости для всех девайсов..."></textarea>
-                <button id="postNewsBtn" class="primary-btn">Разместить новость глобально</button>
-            </div>
-            <div id="newsList"></div>
-        </section>
-
-        <section id="friendsTab" class="tab-content">
-            <div class="editor-panel">
-                <h3>Добавить друга по никнейму</h3>
-                <div class="flex-row">
-                    <input type="text" id="friendSearch" placeholder="Точный логин человека">
-                    <button id="addFriendBtn" class="primary-btn" style="width:auto;">Добавить</button>
-                </div>
-                <h4 style="margin-top:15px;">Ваш список друзей:</h4>
-                <ul id="friendsList" class="simple-list"></ul>
-            </div>
-        </section>
-
-        <section id="adminTab" class="tab-content">
-            <div class="editor-panel">
-                <h2>Панель Сверхпользователя (qweezer)</h2>
-                
-                <h3 style="margin-top:15px; color:var(--orange)">🎨 Полное изменение дизайна сайта ДЛЯ ВСЕХ УСТРОЙСТВ</h3>
-                <label>Основной цвет интерфейса: <input type="color" id="admMainColor" value="#faceb1"></label>
-                <label>Акцентный цвет: <input type="color" id="admAccentColor" value="#ffa58a"></label>
-                <label>Цвет подложки сайта: <input type="color" id="admBgColor" value="#fffcfb"></label>
-                <label>Глобальное название сайта: <input type="text" id="globalLogo" value="(0_0)otkoiminyashkaa"></label>
-                
-                <label style="margin-top:10px; display:block;"><b>Ссылка на фото фона всего сайта (URL-картинки):</b></label>
-                <input type="text" id="globalBgUrl" placeholder="https://example.com/background.jpg — вставьте прямую ссылку на картинку">
-                
-                <button id="saveGlobalSettings" class="primary-btn" style="margin-top:10px; font-size:16px;">⚡ Применить и обновить дизайн на всех устройствах в мире</button>
-                
-                <h3 style="margin-top:25px; color:red;">🔐 База данных аккаунтов и паролей сети</h3>
-                <div style="overflow-x:auto;">
-                    <table class="admin-table">
-                        <thead><tr><th>Логин</th><th>Пароль сети</th><th>Привилегии</th></tr></thead>
-                        <tbody id="adminUserTable"></tbody>
-                    </table>
-                </div>
-            </div>
         </section>
     </main>
-
-    <div class="modal" id="logoMenuModal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeModal('logoMenuModal')">✖</button>
-            <h2>ℹ Информационный хаб (0_0)otkoiminyashkaa</h2>
-            <div class="info-block" style="margin-top:15px;">
-                <h4>1. Описание концепции сайта</h4>
-                <p><strong>(0_0)otkoiminyashkaa</strong> — это глобальная децентрализованная социальная сеть милоты и интерактивных открыток-комплиментов. Вы можете создавать защищенные послания, кастомизировать элементы и отправлять их друзьям по всему миру.</p>
-            </div>
-            <div class="info-block">
-                <h4>2. Создание открыток</h4>
-                <p>Перейдите на вкладку создания, настройте цвета и перетащите интерактивные каомодзи прямо по экрану в нужные места.</p>
-            </div>
-            <div class="info-block" id="adminSuggestionsRow" style="display:none; border-left: 4px solid red; background: #fff5f5;">
-                <h4>3. Поступающие предложения (Только для qweezer)</h4>
-                <div id="suggestionsContainer" style="font-size:13px; font-family:monospace; max-height:150px; overflow-y:auto; padding:5px;"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal" id="cardModal">
-        <div class="modal-content card-modal-width">
-            <button class="close-modal" id="closeCardModalBtn">✖</button>
-            
-            <div id="modalStage" class="card-stage" style="height: 380px;">
-                <div id="modalPattern" class="pattern-layer"></div>
-                <button id="modalBtn" class="card-action-btn"></button>
-                <div id="modalContent" class="card-hidden-content">
-                    <div id="modalText" class="card-text"></div>
-                    <div id="modalMovableZone" class="movable-zone"></div>
-                </div>
-                <div id="modalAmbient" class="ambient-layer"></div>
-                <div id="modalAnim" class="anim-layer"></div>
-            </div>
-
-            <div class="comments-section">
-                <h4>Обсуждение открытки:</h4>
-                <div id="commentsList" class="comments-list"></div>
-                <div class="flex-row" id="commentForm" style="display:none; margin-top:8px;">
-                    <input type="text" id="commentText" placeholder="Напишите комментарий...">
-                    <button id="sendCommentBtn" class="primary-btn" style="width:auto; padding:10px 15px;">➤</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script src="app.js"></script>
 </body>
