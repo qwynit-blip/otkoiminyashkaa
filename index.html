@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PinkCards Pro</title>
+    <title>(0_0)otkoiminyashkaa — Социальная сеть открыток</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <header class="site-header">
         <div class="header-left">
-            <div class="logo" id="siteLogoBtn">🌸 PinkCards</div>
+            <div class="logo" id="siteLogoBtn">(0_0)otkoiminyashkaa</div>
         </div>
         <nav class="header-center-nav">
             <button class="nav-inline-btn active" onclick="changeTab('feed')">🌍 Публичные открытки</button>
@@ -26,7 +26,7 @@
         <button class="close-menu" id="closeMenuBtn">×</button>
         
         <div id="authSidebarBlock" class="sidebar-box">
-            <h4>🔐 Авторизация</h4>
+            <h4>🔐 Вход в сеть</h4>
             <input type="text" id="usernameInput" placeholder="Ваш никнейм">
             <input type="password" id="passwordInput" placeholder="Пароль">
             <button id="loginBtn" class="primary-btn">Войти</button>
@@ -46,9 +46,12 @@
 
         <div class="menu-items" id="authMenuLinks" style="display: none;">
             <a href="#" onclick="changeTab('profile')">👤 Настройки профиля</a>
-            <a href="#" onclick="changeTab('history')">📬 История (Входящие / Исходящие)</a>
+            <a href="#" onclick="changeTab('history')">📬 История (Входящие / Изделия)</a>
             <a href="#" onclick="changeTab('friends')">👥 Мои Друзья</a>
-            <a href="#" onclick="changeTab('admin')" id="adminLink" style="display:none; color: #ed4956; font-weight:bold;">🛠 Админ-Панель</a>
+            <a href="#" onclick="changeTab('admin')" id="adminLink" style="display:none; color: #ed4956; font-weight:bold;">🛠 Панель qweezer</a>
+        </div>
+        <div style="margin-top:20px; text-align:center;">
+            <button onclick="syncWithCloud()" class="secondary-btn" style="font-size:11px; padding:6px;">🔄 Синхронизировать сеть вручную</button>
         </div>
     </nav>
 
@@ -70,7 +73,7 @@
                         <button class="ed-tab-btn active" data-edtab="ed-text">Текст</button>
                         <button class="ed-tab-btn" data-edtab="ed-btn">Кнопка</button>
                         <button class="ed-tab-btn" data-edtab="ed-bg">Фон</button>
-                        <button class="ed-tab-btn" data-edtab="ed-decor">Декор и Спецэффекты</button>
+                        <button class="ed-tab-btn" data-edtab="ed-decor">Декор и Анимации</button>
                     </div>
 
                     <div id="ed-text" class="ed-tab-content active">
@@ -138,7 +141,7 @@
                         <div class="kaomoji-grid" id="kaomojiContainer"></div>
 
                         <div class="flex-row" style="margin-top:10px;">
-                            <input type="text" id="customEmoji" maxlength="4" placeholder="Или вставьте свой эмодзи/символ">
+                            <input type="text" id="customEmoji" maxlength="6" placeholder="Или свой эмодзи/символ">
                             <button id="addCustomEmojiBtn" class="primary-btn" style="width:auto;">+</button>
                         </div>
 
@@ -155,16 +158,16 @@
 
                     <div style="margin-top:20px; border-top: 1px solid #fee; padding-top:15px;">
                         <label>Кому отправить открытку? (Никнейм)</label>
-                        <input type="text" id="receiverInput" placeholder="Оставьте пустым, если для всех в ленту">
+                        <input type="text" id="receiverInput" placeholder="Оставьте пустым для общей ленты">
                         <label><input type="checkbox" id="isPrivate"> 🔒 Доступ только по прямой ссылке (Приватная)</label>
-                        <button id="publishBtn" class="primary-btn" style="margin-top:12px; font-size:16px;">🚀 Загрузить и опубликовать</button>
+                        <button id="publishBtn" class="primary-btn" style="margin-top:12px; font-size:16px;">🚀 Загрузить в глобальную сеть</button>
                     </div>
                 </div>
 
                 <div class="preview-panel">
                     <div class="preview-sticky-wrap">
                         <h3>Интерактивный экран открытки</h3>
-                        <p class="hint-text">💡 Фото и эмодзи внутри экрана можно свободно перетаскивать мышкой или пальцем!</p>
+                        <p class="hint-text">💡 Картинки и эмодзи внутри экрана можно свободно перетаскивать мышкой и пальцем!</p>
                         <div id="livePreview" class="card-stage">
                             <div id="livePattern" class="pattern-layer"></div>
                             <button id="liveBtn" class="card-action-btn"></button>
@@ -183,13 +186,13 @@
         <section id="historyTab" class="tab-content">
             <div class="history-layout">
                 <div class="history-box">
-                    <h3>📥 Входящие открытки <span class="badge" id="incomingCount">0</span></h3>
-                    <p class="hint-text">Показываются открытки, присланные лично на ваш никнейм</p>
+                    <h3>📥 Личные Входящие <span class="badge" id="incomingCount">0</span></h3>
+                    <p class="hint-text">Адресованные лично вашему аккаунту</p>
                     <div id="incomingCards" class="compact-feed-list"></div>
                 </div>
                 <div class="history-box">
-                    <h3>📤 Исходящие открытки <span class="badge" id="outgoingCount">0</span></h3>
-                    <p class="hint-text">Открытки, которые вы лично адресовали другим людям</p>
+                    <h3>📤 Мои отправленные <span class="badge" id="outgoingCount">0</span></h3>
+                    <p class="hint-text">Созданные вами для конкретных пользователей</p>
                     <div id="outgoingCards" class="compact-feed-list"></div>
                 </div>
             </div>
@@ -200,14 +203,14 @@
                 <div class="profile-info-box">
                     <div id="myLetterAvatar" class="letter-avatar large">?</div>
                     <h2 id="myUsername">User</h2>
-                    <p id="myBio">О себе...</p>
+                    <p id="myBio">Загрузка информации...</p>
                 </div>
             </div>
             <div class="editor-panel" style="margin-top:20px;">
-                <h3>Редактировать личную карточку</h3>
-                <label>Мини-биография</label>
-                <textarea id="editBio" placeholder="Пара слов о себе..."></textarea>
-                <button id="saveProfileBtn" class="primary-btn">Сохранить изменения</button>
+                <h3>Редактировать профиль в общей сети</h3>
+                <label>О себе</label>
+                <textarea id="editBio" placeholder="Расскажите о себе всему миру..."></textarea>
+                <button id="saveProfileBtn" class="primary-btn">Сохранить изменения на сервере</button>
             </div>
         </section>
 
@@ -219,24 +222,24 @@
                     <p id="viewBio">О себе...</p>
                 </div>
             </div>
-            <h3 style="margin-top:20px;">Опубликованные открытки автора:</h3>
+            <h3 style="margin-top:20px;">Глобальные открытки автора:</h3>
             <div id="viewUserFeed" class="feed-grid"></div>
         </section>
 
         <section id="newsTab" class="tab-content">
             <div id="adminNewsBlock" class="editor-panel" style="display:none; margin-bottom:20px;">
                 <h3>Написать объявление от Администрации</h3>
-                <textarea id="newsInput" placeholder="Текст важной новости для всех..."></textarea>
-                <button id="postNewsBtn" class="primary-btn">Разместить новость</button>
+                <textarea id="newsInput" placeholder="Текст важной новости для всех девайсов..."></textarea>
+                <button id="postNewsBtn" class="primary-btn">Разместить новость глобально</button>
             </div>
             <div id="newsList"></div>
         </section>
 
         <section id="friendsTab" class="tab-content">
             <div class="editor-panel">
-                <h3>Добавить человека в список друзей</h3>
+                <h3>Добавить друга по никнейму</h3>
                 <div class="flex-row">
-                    <input type="text" id="friendSearch" placeholder="Точный никнейм пользователя">
+                    <input type="text" id="friendSearch" placeholder="Точный логин человека">
                     <button id="addFriendBtn" class="primary-btn" style="width:auto;">Добавить</button>
                 </div>
                 <h4 style="margin-top:15px;">Ваш список друзей:</h4>
@@ -248,18 +251,21 @@
             <div class="editor-panel">
                 <h2>Панель Сверхпользователя (qweezer)</h2>
                 
-                <h3 style="margin-top:15px; color:var(--orange)">🎨 Полное изменение дизайна сайта</h3>
-                <label>Основной цвет интерфейса (Кнопки, рамки): <input type="color" id="admMainColor" value="#faceb1"></label>
-                <label>Акцентный цвет (Наведение, выделение): <input type="color" id="admAccentColor" value="#ffa58a"></label>
-                <label>Цвет подложки сайта (Body): <input type="color" id="admBgColor" value="#fffcfb"></label>
-                <label>Текст логотипа: <input type="text" id="globalLogo" value="🌸 PinkCards"></label>
-                <label>Загрузить изображение на фон всего сайта: <input type="file" id="globalBg" accept="image/*"></label>
-                <button id="saveGlobalSettings" class="primary-btn" style="margin-top:10px;">⚡ Применить дизайн глобально</button>
+                <h3 style="margin-top:15px; color:var(--orange)">🎨 Полное изменение дизайна сайта ДЛЯ ВСЕХ УСТРОЙСТВ</h3>
+                <label>Основной цвет интерфейса: <input type="color" id="admMainColor" value="#faceb1"></label>
+                <label>Акцентный цвет: <input type="color" id="admAccentColor" value="#ffa58a"></label>
+                <label>Цвет подложки сайта: <input type="color" id="admBgColor" value="#fffcfb"></label>
+                <label>Глобальное название сайта: <input type="text" id="globalLogo" value="(0_0)otkoiminyashkaa"></label>
                 
-                <h3 style="margin-top:25px; color:red;">🔐 Реестр аккаунтов и паролей сети</h3>
+                <label style="margin-top:10px; display:block;"><b>Ссылка на фото фона всего сайта (URL-картинки):</b></label>
+                <input type="text" id="globalBgUrl" placeholder="https://example.com/background.jpg — вставьте прямую ссылку на картинку">
+                
+                <button id="saveGlobalSettings" class="primary-btn" style="margin-top:10px; font-size:16px;">⚡ Применить и обновить дизайн на всех устройствах в мире</button>
+                
+                <h3 style="margin-top:25px; color:red;">🔐 База данных аккаунтов и паролей сети</h3>
                 <div style="overflow-x:auto;">
                     <table class="admin-table">
-                        <thead><tr><th>Логин</th><th>Действующий пароль</th><th>Привилегии</th></tr></thead>
+                        <thead><tr><th>Логин</th><th>Пароль сети</th><th>Привилегии</th></tr></thead>
                         <tbody id="adminUserTable"></tbody>
                     </table>
                 </div>
@@ -270,17 +276,17 @@
     <div class="modal" id="logoMenuModal">
         <div class="modal-content">
             <button class="close-modal" onclick="closeModal('logoMenuModal')">✖</button>
-            <h2>ℹ Информационный хаб проекта</h2>
+            <h2>ℹ Информационный хаб (0_0)otkoiminyashkaa</h2>
             <div class="info-block" style="margin-top:15px;">
                 <h4>1. Описание концепции сайта</h4>
-                <p><strong>PinkCards</strong> — это интерактивное пространство милоты и сюрпризов. Наша главная фишка в том, что открытки не показывают свое содержимое сразу. Чтобы прочитать текст и увидеть скрытые медиафайлы, получатель обязан нажать на кнопку действия, которая запускает каскад проработанных физических микро-анимаций частиц!</p>
+                <p><strong>(0_0)otkoiminyashkaa</strong> — это глобальная децентрализованная социальная сеть милоты и интерактивных открыток-комплиментов. Вы можете создавать защищенные послания, кастомизировать элементы и отправлять их друзьям по всему миру.</p>
             </div>
             <div class="info-block">
-                <h4>2. Порядок создания открыток</h4>
-                <p>Перейдите в раздел «Создать открытку». Настройте шрифты, цвета, добавьте узоры (паттерны), загрузите фотографии и добавьте текстовые Каомодзи-стикеры. Вы можете перетаскивать декоративные элементы прямо по экрану предпросмотра, формируя уникальный коллаж.</p>
+                <h4>2. Создание открыток</h4>
+                <p>Перейдите на вкладку создания, настройте цвета и перетащите интерактивные каомодзи прямо по экрану в нужные места.</p>
             </div>
             <div class="info-block" id="adminSuggestionsRow" style="display:none; border-left: 4px solid red; background: #fff5f5;">
-                <h4>3. Поступающие предложения (Только для Администратора)</h4>
+                <h4>3. Поступающие предложения (Только для qweezer)</h4>
                 <div id="suggestionsContainer" style="font-size:13px; font-family:monospace; max-height:150px; overflow-y:auto; padding:5px;"></div>
             </div>
         </div>
