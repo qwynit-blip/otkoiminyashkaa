@@ -3,79 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Otkoiminyashkaa - Создай открытку</title>
-    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <title>Розовые Открытки ✨</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <header class="site-header">
-        <div class="logo-area" id="logoArea">
-            <span class="logo-icon" id="logoIcon">💌</span>
-            <h1 class="site-title" id="siteTitle">Otkoiminyashkaa</h1>
-        </div>
-        <button class="menu-btn" id="menuBtn">☰</button>
+        <div class="logo" id="siteLogo">🌸 PinkCards</div>
+        <button class="burger-menu" id="burgerBtn">☰</button>
     </header>
 
-    <div class="overlay" id="overlay"></div>
-    <div class="side-menu" id="sideMenu">
-        <div class="menu-header"><h3>Меню</h3><button class="close-menu" id="closeMenu">✖</button></div>
-        <div class="menu-content" id="menuContent"></div>
-    </div>
+    <nav class="side-menu" id="sideMenu">
+        <button class="close-menu" id="closeMenuBtn">×</button>
+        <div class="menu-items">
+            <a href="#" data-target="create">Создать открытку</a>
+            <a href="#" data-target="feed">Публичные открытки</a>
+            <a href="#" data-target="news">Новости</a>
+            <a href="#" data-target="admin" id="sideAdminLink" style="display:none;">Панель Админа (qweezer)</a>
+        </div>
+    </nav>
 
-    <!-- ГЛАВНАЯ ЛЕНТА (ПУБЛИЧНЫЕ ОТКРЫТКИ) -->
-    <div class="feed-container" id="feedContainer">
-        <div class="feed-header">
-            <h2>📱 Лента открыток</h2>
-            <p>Смотрите открытки других пользователей, ставьте лайки и комментируйте!</p>
+    <main class="main-container">
+        
+        <div class="tabs-navigation">
+            <button class="tab-btn active" data-tab="create">Создать открытку</button>
+            <button class="tab-btn" data-tab="feed">Публичные открытки</button>
+            <button class="tab-btn" data-tab="news">Новости</button>
+            <button class="tab-btn" data-tab="admin" id="tabAdminLink" style="display:none;">Панель Админа</button>
         </div>
-        <div class="create-feed-btn" id="createFeedBtn">
-            <button class="big-create-btn">🎨 Создать свою открытку</button>
-        </div>
-        <div class="auth-buttons" id="authButtons">
-            <button id="showLoginBtnHeader" class="auth-btn">🔑 Войти</button>
-            <button id="showRegisterBtnHeader" class="auth-btn">📝 Регистрация</button>
-        </div>
-        <div class="site-description">
-            <p>💌 <strong>Otkoiminyashkaa</strong> — это место, где ты можешь создавать красивые открытки, делиться ими с друзьями и получать тёплые отзывы. Выбирай анимации, добавляй фото и эмодзи, настраивай фон — сделай свою открытку уникальной!</p>
-        </div>
-        <div class="feed-list" id="feedList"></div>
-    </div>
 
-    <!-- МОДАЛКА КОММЕНТАРИЕВ -->
-    <div class="comments-modal" id="commentsModal">
-        <div class="comments-modal-content">
-            <div class="comments-header">
-                <h3>💬 Комментарии</h3>
-                <button class="close-comments" id="closeCommentsBtn">✖</button>
+        <p class="site-intro">Добро пожаловать на PinkCards! Создавайте уникальные интерактивные открытки с анимациями, делитесь ими с друзьями или публикуйте в общей ленте.</p>
+
+        <section id="createTab" class="tab-content active">
+            <div class="editor-layout">
+                <div class="editor-panel">
+                    <h3>🎨 Настройка открытки</h3>
+                    
+                    <div class="control-group">
+                        <label>Текст открытки:</label>
+                        <textarea id="cardText" placeholder="Напишите поздравление..."></textarea>
+                        <div class="row">
+                            <label><input type="checkbox" id="textCenter"> По центру</label>
+                            <label><input type="checkbox" id="textBold"> Жирный</label>
+                            <input type="color" id="textColor" value="#333333">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Настройка кнопки:</label>
+                        <input type="text" id="buttonText" value="Открыть открытку">
+                        <div class="row">
+                            <label>Фон: <input type="color" id="buttonBgColor" value="#faceb1"></label>
+                            <label>Текст: <input type="color" id="buttonTextColor" value="#ffffff"></label>
+                        </div>
+                        <label>Стиль кнопки:</label>
+                        <select id="buttonStyle">
+                            <option value="rounded">Округлая</option>
+                            <option value="square">Квадратная</option>
+                            <option value="glow">Свечение</option>
+                        </select>
+                        <label>Размер кнопки (отступы): <span id="sizeValue">50</span>px</label>
+                        <input type="range" id="buttonSize" min="20" max="80" value="50">
+                        <label>Фото на кнопку:</label>
+                        <input type="file" id="buttonPhotoInput" accept="image/*">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Медиа и Эмодзи (Макс. 30):</label>
+                        <input type="file" id="photoUpload" accept="image/*">
+                        <label>Размер фото в открытке: <span id="photoSizeValue">100</span>px</label>
+                        <input type="range" id="photoSize" min="40" max="200" value="100">
+                        
+                        <div class="stickers-selector">
+                            <div id="stickersGrid" class="stickers-grid"></div>
+                            <div class="custom-emoji-row">
+                                <input type="text" id="customSticker" placeholder="Свой эмодзи" maxlength="2">
+                                <button id="addCustomSticker" type="button">Добавить</button>
+                            </div>
+                        </div>
+                        <div id="selectedStickers" class="selected-items-list"></div>
+                        <div id="selectedPhotos" class="selected-items-list"></div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Кастомизация фона:</label>
+                        <div class="row">
+                            <label>Цвет 1: <input type="color" id="bgColor1" value="#faceb1"></label>
+                            <label>Цвет 2: <input type="color" id="bgColor2" value="#ffa58a"></label>
+                        </div>
+                        <label>PNG-Паттерн:</label>
+                        <input type="file" id="patternUpload" accept="image/*">
+                        <div class="row">
+                            <label>Размер паттерна: <span id="patternSizeValue">50</span>px</label>
+                            <input type="range" id="patternSize" min="20" max="150" value="50">
+                        </div>
+                        <div class="row">
+                            <label>Прозрачность: <span id="patternOpacityValue">40</span>%</label>
+                            <input type="range" id="patternOpacity" min="10" max="100" value="40">
+                        </div>
+                        <button id="clearPattern" type="button" class="secondary-btn">Удалить паттерн</button>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Эффект при открытии открытки:</label>
+                        <div class="animations-list">
+                            <button type="button" class="anim-select-btn active" data-animation="gift">Подарок 🎁</button>
+                            <button type="button" class="anim-select-btn" data-animation="poop">Накакали 💩</button>
+                            <button type="button" class="anim-select-btn" data-animation="bouquet">Букет 💐</button>
+                            <button type="button" class="anim-select-btn" data-animation="fart">Пук 💨</button>
+                            <button type="button" class="anim-select-btn" data-animation="fall">Упало 📦</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label><input type="checkbox" id="isPrivate"> 🔒 Приватная открытка (только для друзей)</label>
+                    </div>
+
+                    <button id="saveCardBtn" class="primary-btn">✨ Опубликовать открытку</button>
+                </div>
+
+                <div class="preview-panel">
+                    <h3>👀 Живой предпросмотр</h3>
+                    <div id="livePreview" class="card-preview-box">
+                        <div id="livePattern" class="pattern-overlay"></div>
+                        <div class="preview-content">
+                            <button id="liveButton">Открыть открытку</button>
+                            <div id="liveText" class="hidden-preview-element"></div>
+                            <div id="liveStickers" class="hidden-preview-element"></div>
+                            <div id="livePhotos" class="hidden-preview-element"></div>
+                            <div id="animationStage"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="comments-list" id="commentsList"></div>
-            <div class="add-comment">
-                <input type="text" id="commentInput" placeholder="Написать комментарий...">
-                <button id="sendCommentBtn">📤</button>
+        </section>
+
+        <section id="feedTab" class="tab-content">
+            <div id="instagramFeed" class="instagram-feed"></div>
+        </section>
+
+        <section id="newsTab" class="tab-content">
+            <div id="newsAdminPanel" style="display:none; margin-bottom: 20px;" class="editor-panel">
+                <h3>Написать новость (Панель Администратора)</h3>
+                <textarea id="newsText" placeholder="Введите текст системной новости..."></textarea>
+                <button id="postNewsBtn" class="primary-btn">Опубликовать новость для всех</button>
+            </div>
+            <div id="newsContainer" class="news-list"></div>
+        </section>
+
+        <section id="adminTab" class="tab-content">
+            <div class="editor-panel">
+                <h2>🛠 Управление сайтом (Аккаунт: qweezer)</h2>
+                <div class="control-group">
+                    <label>Глобальный фоновый рисунок всего сайта:</label>
+                    <input type="file" id="adminSiteBg" accept="image/*">
+                    <button id="resetAdminBg" class="secondary-btn">Сбросить фон по умолчанию</button>
+                </div>
+                <div class="control-group">
+                    <label>Глобальный текстовый логотип сайта:</label>
+                    <input type="text" id="adminLogoText" value="🌸 PinkCards">
+                    <button id="saveAdminLogo" class="primary-btn" style="width: auto;">Обновить логотип</button>
+                </div>
+                <h3>Все открытки в системе (Включая приватные 🔒):</h3>
+                <div id="adminAllCardsGrid" class="instagram-feed"></div>
+            </div>
+        </section>
+
+        <section class="auth-section">
+            <div id="loginForm" class="editor-panel">
+                <h3>🔐 Авторизация / Регистрация</h3>
+                <div class="row">
+                    <input type="text" id="usernameInput" placeholder="Имя пользователя (Логин)">
+                    <input type="password" id="passwordInput" placeholder="Пароль">
+                </div>
+                <div class="row">
+                    <button id="loginBtn" class="primary-btn">Войти</button>
+                    <button id="registerBtn" class="secondary-btn">Зарегистрироваться</button>
+                </div>
+                <p style="font-size: 11px; color:#999; margin-top:5px;">*Для входа в панель администратора используйте логин: <b>qweezer</b></p>
+            </div>
+
+            <div id="userProfileBlock" class="editor-panel" style="display: none;">
+                <div class="profile-header">
+                    <p>Вы авторизованы как: <strong id="currentUserName">👤</strong> <span id="currentUserRole" class="role-badge">User</span></p>
+                    <button id="logoutBtn" class="secondary-btn" style="width:auto; padding: 5px 15px;">Выйти</button>
+                </div>
+
+                <div class="social-grid">
+                    <div class="friends-management">
+                        <h4>👥 Добавить друга</h4>
+                        <div class="row">
+                            <input type="text" id="friendNameInput" placeholder="Имя друга">
+                            <button id="addFriendBtn" class="primary-btn" style="width:auto;">Добавить</button>
+                        </div>
+                        <ul id="friendsList" class="friends-list"></ul>
+                    </div>
+
+                    <div class="history-management">
+                        <h4>📨 Архивы трансляций открыток</h4>
+                        <div class="history-triggers-row">
+                            <div class="history-tab-trigger" id="historyInTrigger">
+                                📥 Входящие открытки
+                                <div class="history-popover" id="historyInPopover">Нет входящих</div>
+                            </div>
+                            <div class="history-tab-trigger" id="historyOutTrigger">
+                                📤 Исходящие открытки
+                                <div class="history-popover" id="historyOutPopover">Нет исходящих</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal" id="cardModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeModalBtn">×</button>
+            <div id="modalCardRenderStage"></div>
+            <div class="modal-comments-section">
+                <h4>💬 Комментарии пользователей</h4>
+                <div id="modalCommentsList" class="comments-list"></div>
+                <div id="addCommentForm" class="row" style="margin-top: 15px;">
+                    <input type="text" id="commentTextInput" placeholder="Оставьте ваше мнение...">
+                    <button id="submitCommentBtn" class="primary-btn" style="width: auto;">Отправить</button>
+                </div>
             </div>
         </div>
-    </div>
-
-    <!-- МОДАЛКИ АВТОРИЗАЦИИ -->
-    <div class="modal" id="loginModal">
-        <h3>🔑 Вход</h3>
-        <input type="text" id="loginUsername" placeholder="Имя пользователя">
-        <input type="password" id="loginPassword" placeholder="Пароль">
-        <button id="loginSubmitBtn">Войти</button>
-        <button class="modal-close">Закрыть</button>
-        <p>Нет аккаунта? <a href="#" id="switchToRegister">Зарегистрируйтесь</a></p>
-    </div>
-
-    <div class="modal" id="registerModal">
-        <h3>📝 Регистрация</h3>
-        <input type="text" id="regUsername" placeholder="Имя пользователя">
-        <input type="password" id="regPassword" placeholder="Пароль">
-        <button id="registerSubmitBtn">Зарегистрироваться</button>
-        <button class="modal-close">Закрыть</button>
-        <p>Уже есть аккаунт? <a href="#" id="switchToLogin">Войдите</a></p>
     </div>
 
     <script src="app.js"></script>
-    <script src="main.js"></script>
 </body>
 </html>
